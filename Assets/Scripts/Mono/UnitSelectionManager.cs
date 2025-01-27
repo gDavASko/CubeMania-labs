@@ -4,7 +4,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Transforms;
-using UnityEditor.Search;
 using UnityEngine;
 
 public class UnitSelectionManager : MonoBehaviour
@@ -90,8 +89,6 @@ public class UnitSelectionManager : MonoBehaviour
 
                 UnityEngine.Ray cameraRay = _cam.ScreenPointToRay(Input.mousePosition);
 
-                int unitsLayer = 6;
-
                 var ray = new RaycastInput()
                 {
                     Start = cameraRay.GetPoint(0f),
@@ -100,14 +97,14 @@ public class UnitSelectionManager : MonoBehaviour
                     {
                         GroupIndex = 0,
                         BelongsTo = ~0u,
-                        CollidesWith = 1u << unitsLayer,
+                        CollidesWith = 1u << GameAssets.UNITS_LAYER,
                     }
                 };
 
 
                 if (colls.CastRay(ray, out Unity.Physics.RaycastHit hit))
                 {
-                    if (em.HasComponent<Unit>(hit.Entity))
+                    if (em.HasComponent<Unit>(hit.Entity) && em.HasComponent<Selected>(hit.Entity))
                     {
                         em.SetComponentEnabled<Selected>(hit.Entity, true);
                         var selected = em.GetComponentData<Selected>(hit.Entity);

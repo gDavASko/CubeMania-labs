@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -4302662930949579497, guid: 80c05707296045442b3b01165dcea93d, type: 3}
+      propertyPath: range
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: -4302662930949579497, guid: 80c05707296045442b3b01165dcea93d, type: 3}
+      propertyPath: targetFraction
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: -2927116152853963988, guid: 80c05707296045442b3b01165dcea93d, type: 3}
       propertyPath: Fraction
       value: 2

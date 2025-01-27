@@ -11,18 +11,17 @@ partial struct SelectedVisualSystem : ISystem
     {
         foreach (var selected in SystemAPI.Query<RefRO<Selected>>().WithPresent<Selected>())
         {
-            if (selected.ValueRO.onSelected)
-            {
-                var lt = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.visualEntity);
-                lt.ValueRW.Scale = selected.ValueRO.showScale;
-            }
-
             if (selected.ValueRO.onDeselected)
             {
                 var lt = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.visualEntity);
                 lt.ValueRW.Scale = 0f;
             }
-            
+
+            if (selected.ValueRO.onSelected)
+            {
+                var lt = SystemAPI.GetComponentRW<LocalTransform>(selected.ValueRO.visualEntity);
+                lt.ValueRW.Scale = selected.ValueRO.showScale;
+            }            
         }
     }
 }
