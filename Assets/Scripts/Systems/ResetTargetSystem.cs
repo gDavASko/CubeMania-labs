@@ -15,7 +15,7 @@ partial struct ResetTargetSystem : ISystem
                 continue;
 
             if(!SystemAPI.Exists(target.ValueRO.targetEntity)
-                || SystemAPI.HasComponent<LocalTransform>(target.ValueRO.targetEntity))
+                || !SystemAPI.HasComponent<LocalTransform>(target.ValueRO.targetEntity))
                 target.ValueRW.targetEntity = Entity.Null;
         }
     }
