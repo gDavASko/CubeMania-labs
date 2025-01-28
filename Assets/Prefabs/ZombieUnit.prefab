@@ -20,6 +20,10 @@ PrefabInstance:
       propertyPath: Fraction
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: -539202107544500161, guid: 80c05707296045442b3b01165dcea93d, type: 3}
+      propertyPath: targetGO
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4973806596483722944, guid: 80c05707296045442b3b01165dcea93d, type: 3}
       propertyPath: m_Name
       value: ZombieUnit
