@@ -1,15 +1,18 @@
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
+using Unity.Transforms;
 
 partial struct ShootAttackSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-       foreach(var (shooter, target) in SystemAPI
+        var refs = SystemAPI.GetSingleton<EntitiesReferences>();
+
+       foreach(var (shooter, target, trs) in SystemAPI
             .Query< RefRW<ShootAttack>, 
-                    RefRO<Target>>())
+                    RefRO<Target>,
+                    RefRO<LocalTransform>>())
         {
             if (target.ValueRO.targetEntity == Entity.Null)
                 continue;
@@ -22,9 +25,14 @@ partial struct ShootAttackSystem : ISystem
 
             shooter.ValueRW.timer = shooter.ValueRO.timerMax;
 
-            int damage = 1;
-            var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.targetEntity);
-            targetHealth.ValueRW.health = math.max(0, targetHealth.ValueRO.health - damage);
+            var bullet = state.EntityManager.Instantiate(refs.bulletEntity);
+            SystemAPI.SetComponent(bullet, LocalTransform.FromPosition(trs.ValueRO.Position));
+
+            var bBullet = SystemAPI.GetComponentRW<Bullet>(bullet);
+            bBullet.ValueRW.damage = shooter.ValueRO.damage;
+
+            var tBullet = SystemAPI.GetComponentRW<Target>(bullet);
+            tBullet.ValueRW.targetEntity = target.ValueRO.targetEntity;
         }
     }
 }

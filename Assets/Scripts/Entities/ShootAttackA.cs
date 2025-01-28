@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class ShootAttackA : MonoBehaviour
 {
+    public int damage = 5;
     public float timerMax = 0.2f;
 
     public class Baker : Baker<ShootAttackA>
@@ -12,6 +13,7 @@ public class ShootAttackA : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, new ShootAttack()
             {
+                damage = authoring.damage,
                 timerMax = authoring.timerMax
             });
         }
@@ -20,6 +22,7 @@ public class ShootAttackA : MonoBehaviour
 
 public struct ShootAttack: IComponentData
 {
+    public int damage;
     public float timer;
     public float timerMax;
 }

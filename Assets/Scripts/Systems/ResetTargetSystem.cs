@@ -1,7 +1,8 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Transforms;
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
+[UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 partial struct ResetTargetSystem : ISystem
 {
     [BurstCompile]
@@ -10,7 +11,11 @@ partial struct ResetTargetSystem : ISystem
         foreach (var target in SystemAPI
              .Query<RefRW<Target>>())
         {
-            if(!SystemAPI.Exists(target.ValueRO.targetEntity))
+            if(target.ValueRO.targetEntity == Entity.Null) 
+                continue;
+
+            if(!SystemAPI.Exists(target.ValueRO.targetEntity)
+                || SystemAPI.HasComponent<LocalTransform>(target.ValueRO.targetEntity))
                 target.ValueRW.targetEntity = Entity.Null;
         }
     }

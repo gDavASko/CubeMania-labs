@@ -17,6 +17,12 @@ partial struct BulletMoverSystem : ISystem
                 RefRO<Bullet>,
                 RefRO<Target>>().WithEntityAccess())
         {
+            if (target.ValueRO.targetEntity == Entity.Null)
+            {
+                buffer.DestroyEntity(bulletE);
+                continue;
+            }
+
             var targetTrs = SystemAPI.GetComponentRO<LocalTransform>(target.ValueRO.targetEntity);
 
             float distBefore = math.distancesq(lt.ValueRO.Position, targetTrs.ValueRO.Position);
