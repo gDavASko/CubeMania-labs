@@ -39,6 +39,9 @@ partial struct FindTargetSystem : ISystem
             {
                 foreach (var hit in hits)
                 {
+                    if (!SystemAPI.Exists(hit.Entity) || !SystemAPI.HasComponent<Unit>(hit.Entity))
+                        continue;
+
                     if(SystemAPI.GetComponent<Unit>(hit.Entity).fraction == finder.ValueRO.targetFraction)
                     {
                         target.ValueRW.targetEntity = hit.Entity;

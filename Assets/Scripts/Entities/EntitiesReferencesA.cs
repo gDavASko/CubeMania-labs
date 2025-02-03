@@ -4,6 +4,7 @@ using UnityEngine;
 public class EntitiesReferencesA : MonoBehaviour
 {
     public GameObject bulletGO;
+    public GameObject zombieGO;
 
     public class Baker : Baker<EntitiesReferencesA>
     {
@@ -12,7 +13,8 @@ public class EntitiesReferencesA : MonoBehaviour
             var e = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(e, new EntitiesReferences()
             {
-                bulletEntity = GetEntity(authoring.bulletGO, TransformUsageFlags.Dynamic)
+                bulletEntity = GetEntity(authoring.bulletGO, TransformUsageFlags.Dynamic),
+                zombieEntity = GetEntity(authoring.zombieGO, TransformUsageFlags.Dynamic),
             });
         }
     }
@@ -21,4 +23,5 @@ public class EntitiesReferencesA : MonoBehaviour
 public struct EntitiesReferences: IComponentData
 {
     public Entity bulletEntity;
+    public Entity zombieEntity;
 }
