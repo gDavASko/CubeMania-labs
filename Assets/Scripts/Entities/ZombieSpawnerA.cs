@@ -4,6 +4,8 @@ using UnityEngine;
 public class ZombieSpawnerA : MonoBehaviour
 {
     public float timerMax;
+    public float minRndDist;
+    public float maxRndDist;
 
     public class Baker : Baker<ZombieSpawnerA>
     {
@@ -13,7 +15,9 @@ public class ZombieSpawnerA : MonoBehaviour
             AddComponent(e, new ZombieSpawner()
             {                
                 timer = 0,
-                timerMax = authoring.timerMax
+                timerMax = authoring.timerMax,
+                minRndDist = authoring.minRndDist,
+                maxRndDist = authoring.maxRndDist,
             });
         }
     }
@@ -23,4 +27,6 @@ public struct ZombieSpawner: IComponentData
 {
     public float timer;
     public float timerMax;
+    public float minRndDist;
+    public float maxRndDist;
 }

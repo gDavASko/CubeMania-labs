@@ -6,6 +6,8 @@ using Unity.Transforms;
 
 partial struct UnitMoverSystem : ISystem
 {
+    public const float REACH_TARGET_DISTANCE = 2f;
+
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
@@ -49,8 +51,8 @@ public partial struct UnitMoverJob: IJobEntity
     {
         float3 dir = um.targetPos - lt.Position;
 
-        float targetDist = 2f;
-        if (math.lengthsq(dir) < targetDist)
+        float targetDist = UnitMoverSystem.REACH_TARGET_DISTANCE;
+        if (math.lengthsq(dir) <= targetDist)
         {
             physVel.Linear = float3.zero;
             physVel.Angular = float3.zero;
