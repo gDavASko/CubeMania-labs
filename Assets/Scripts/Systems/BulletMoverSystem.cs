@@ -47,6 +47,7 @@ partial struct BulletMoverSystem : ISystem
             {
                 var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.targetEntity);
                 targetHealth.ValueRW.health -= bullet.ValueRO.damage;
+                targetHealth.ValueRW.onHPChanged = true;
 
                 buffer.DestroyEntity(bulletE);
             }

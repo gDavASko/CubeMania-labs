@@ -2,7 +2,7 @@ using Unity.Burst;
 using Unity.Entities;
 using UnityEngine.UI;
 
-[UpdateInGroup(typeof(LateSimulationSystemGroup))]
+[UpdateInGroup(typeof(LateSimulationSystemGroup), OrderLast = true)]
 partial struct ResetEventsSystem : ISystem
 {
 
@@ -13,6 +13,11 @@ partial struct ResetEventsSystem : ISystem
         {
             select.ValueRW.onSelected = false;
             select.ValueRW.onDeselected = false;
+        };
+
+        foreach (var hp in SystemAPI.Query<RefRW<Health>>())
+        {
+            hp.ValueRW.onHPChanged = false;
         };
     }
 }

@@ -137,6 +137,10 @@ PrefabInstance:
       propertyPath: Fraction
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2139172949189502683, guid: 80c05707296045442b3b01165dcea93d, type: 3}
+      propertyPath: maxHealth
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 2721958407968776854, guid: 80c05707296045442b3b01165dcea93d, type: 3}
       propertyPath: moveSpeed
       value: 5
