@@ -56,6 +56,9 @@ partial struct ShootAttackSystem : ISystem
 
             var tBullet = SystemAPI.GetComponentRW<Target>(bullet);
             tBullet.ValueRW.targetEntity = target.ValueRO.targetEntity;
+
+            shooter.ValueRW.onShoot.IsTriggered = true;
+            shooter.ValueRW.onShoot.ShootPos = pos;
         }
     }
 }

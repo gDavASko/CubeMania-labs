@@ -1466,6 +1466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletGO: {fileID: 6099188303352808211, guid: dc1ae9b4ab0547947af6091f81a69fac, type: 3}
   zombieGO: {fileID: 8228116460381023235, guid: b3132fc4fe411c749ba7768ebea75ea3, type: 3}
+  shootLightGO: {fileID: 1760628485234616683, guid: 0c7dd838e4d705643937b819341145ac, type: 3}
 --- !u!4 &1050655856
 Transform:
   m_ObjectHideFlags: 0

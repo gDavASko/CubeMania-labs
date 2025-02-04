@@ -32,4 +32,12 @@ public struct ShootAttack: IComponentData
     public float timer;
     public float timerMax;
     public float3 bulletSpawnPoint;
+
+    public OnShootEvent onShoot;
+
+    public struct OnShootEvent
+    {
+        public bool IsTriggered;
+        public float3 ShootPos;
+    }
 }

@@ -5,6 +5,7 @@ public class EntitiesReferencesA : MonoBehaviour
 {
     public GameObject bulletGO;
     public GameObject zombieGO;
+    public GameObject shootLightGO;
 
     public class Baker : Baker<EntitiesReferencesA>
     {
@@ -15,6 +16,7 @@ public class EntitiesReferencesA : MonoBehaviour
             {
                 bulletEntity = GetEntity(authoring.bulletGO, TransformUsageFlags.Dynamic),
                 zombieEntity = GetEntity(authoring.zombieGO, TransformUsageFlags.Dynamic),
+                shootLightEntity = GetEntity(authoring.shootLightGO, TransformUsageFlags.Dynamic),
             });
         }
     }
@@ -24,4 +26,5 @@ public struct EntitiesReferences: IComponentData
 {
     public Entity bulletEntity;
     public Entity zombieEntity;
+    public Entity shootLightEntity;
 }

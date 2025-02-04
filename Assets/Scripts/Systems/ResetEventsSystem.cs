@@ -19,5 +19,10 @@ partial struct ResetEventsSystem : ISystem
         {
             hp.ValueRW.onHPChanged = false;
         };
+
+        foreach (var hp in SystemAPI.Query<RefRW<ShootAttack>>())
+        {
+            hp.ValueRW.onShoot.IsTriggered = false;
+        };
     }
 }
