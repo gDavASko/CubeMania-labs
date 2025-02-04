@@ -124,20 +124,23 @@ public class UnitSelectionManager : MonoBehaviour
             var em = World.DefaultGameObjectInjectionWorld.EntityManager;
 
             var query = new EntityQueryBuilder(allocator: Allocator.Temp)
-                .WithAll<UnitMover, Selected>()
+                .WithAll<Selected>()
+                .WithPresent<MoveOverride>()
                 .Build(em);
 
             NativeArray<Entity> entities = query.ToEntityArray(Allocator.Temp);
-            NativeArray<UnitMover> initArr =
-                query.ToComponentDataArray<UnitMover>(Allocator.Temp);
+            NativeArray<MoveOverride> initArr =
+                query.ToComponentDataArray<MoveOverride>(Allocator.Temp);
 
             var positions = GenPositions(mPos, initArr.Length);
 
             for (int i = 0; i < initArr.Length; i++)
             {
                 var mover = initArr[i];
-                mover.targetPos = positions[i];
+                mover.targetPosition = positions[i];
                 initArr[i] = mover;
+
+                em.SetComponentEnabled<MoveOverride>(entities[i], true);
             }
             query.CopyFromComponentDataArray(initArr);
         }

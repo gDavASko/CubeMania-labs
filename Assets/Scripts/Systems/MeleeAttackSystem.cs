@@ -18,7 +18,8 @@ partial struct MeleeAttackSystem : ISystem
             .Query<RefRW<MeleeAttack>,
                     RefRO<Target>,
                     RefRW<LocalTransform>,
-                    RefRW<UnitMover>>())
+                    RefRW<UnitMover>>()
+                    .WithDisabled<MoveOverride>())
         {
             if (target.ValueRO.targetEntity == Entity.Null)
                 continue;
