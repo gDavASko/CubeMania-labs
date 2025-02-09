@@ -8,7 +8,7 @@ partial struct ShootLightSpawnSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var refs = SystemAPI.GetSingleton<EntitiesReferences>();
+        /*var refs = SystemAPI.GetSingleton<EntitiesReferences>();
 
         foreach (var shooter in SystemAPI.Query<RefRW<ShootAttack>>())
         {
@@ -18,6 +18,6 @@ partial struct ShootLightSpawnSystem : ISystem
                 SystemAPI.SetComponent<LocalTransform>
                     (light, LocalTransform.FromPosition(shooter.ValueRO.onShoot.ShootPos));
             }
-        }
+        }*/
     }
 }

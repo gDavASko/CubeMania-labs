@@ -9,7 +9,7 @@ partial struct ShootAttackSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var refs = SystemAPI.GetSingleton<EntitiesReferences>();
+        /*var refs = SystemAPI.GetSingleton<EntitiesReferences>();
 
        foreach(var (shooter, target, trs, mover) in SystemAPI
             .Query< RefRW<ShootAttack>, 
@@ -48,7 +48,7 @@ partial struct ShootAttackSystem : ISystem
 
             shooter.ValueRW.timer = shooter.ValueRO.timerMax;           
 
-            var bullet = state.EntityManager.Instantiate(refs.bulletEntity);
+            /*var bullet = state.EntityManager.Instantiate(refs.bulletEntity);
             var pos = trs.ValueRO.TransformPoint(shooter.ValueRO.bulletSpawnPoint);
             SystemAPI.SetComponent(bullet, LocalTransform.FromPosition(pos));
 
@@ -60,6 +60,6 @@ partial struct ShootAttackSystem : ISystem
 
             shooter.ValueRW.onShoot.IsTriggered = true;
             shooter.ValueRW.onShoot.ShootPos = pos;
-        }
+        }*/
     }
 }

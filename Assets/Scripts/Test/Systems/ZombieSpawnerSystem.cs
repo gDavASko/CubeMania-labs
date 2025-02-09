@@ -7,7 +7,7 @@ partial struct ZombieSpawnerSystem : ISystem
     [BurstCompile]
     public void OnUpdate(ref SystemState state)
     {
-        var env = SystemAPI.GetSingleton<EntitiesReferences>();
+        /*var env = SystemAPI.GetSingleton<EntitiesReferences>();
 
         EntityCommandBuffer entityCommandBuffer = 
             SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>()
@@ -33,6 +33,6 @@ partial struct ZombieSpawnerSystem : ISystem
                 maxDist = zs.ValueRO.maxRndDist,
                 Random = new Unity.Mathematics.Random((uint)zombie.Index)
             });
-        }
+        }*/
     }
 }
