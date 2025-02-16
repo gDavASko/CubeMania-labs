@@ -11,43 +11,41 @@ namespace GDB.Planetary
 {
     public enum GenStep
     {
+        GenUnbreakPoints = -3,
+        GenUnbreakSecond = -2,
+        GenUnbreakFinish = -1,
         GenSandPoints = 0,
-        GenSandCubes = 1,
-        GenResourcesPoints = 2,
-        GenResourceCube = 3,
-        GetFinish = 1000,
+        GenResourcesPoints = 1,
+        GenCubeEntities = 2,
+        GenFinish = 1000,
     }
-    
+
     public partial class RantimeGeneratorS : SystemBase
     {
         // Создаем NativeList для результата (плоский список узлов)
-        private Dictionary<float3, Entity> sandNodes = new();
-        private Dictionary<float3, Entity> resourceNodes = new();
-        
+        private Dictionary<float3, CubeType> nodes = new();
         private Queue<(uint, float3)> queueNodes = new();
 
         private GenStep curStep;
-
         private float3 center = new float3(0, 0, 0);
+        private float3 lastUnbreakPoint = new float3(0, 0, 0);
 
         private int curBox = 0;
-        private int curResourceBox = 0;
+
+        private bool cubesInited = false;
+        private int resCount = 0;
+
+        private int maxCenters = 10;
+        private int curCenter = 0;
 
         private int maxResources = 10;
         private int curResCount = 0;
-
-        private bool completedPoints;
-        private bool completedResourcesPoints;
-        private bool completedCubes;
 
         private bool initedResources;
 
         private EntityCommandBuffer ecb;
 
-        private Entity baseCube = Entity.Null;
-        private Entity sandCube = Entity.Null;
-        private Entity ResourceCube = Entity.Null;
-        private Entity rockCube = Entity.Null;
+        private Dictionary<CubeType, List<Entity>> cubeEntities = new();
 
         private readonly float3[] directions = new float3[6]
         {
@@ -63,12 +61,9 @@ namespace GDB.Planetary
         protected override void OnCreate()
         {
             base.OnCreate();
-            curStep = GenStep.GenSandPoints;    
-            completedPoints = false;
-            completedResourcesPoints = false;
-            completedCubes = false;
+            curStep = GenStep.GenSandPoints;
             initedResources = false;
-
+            cubesInited = false;
             curResCount = 0;
             queueNodes.Enqueue((0, center));
         }
@@ -78,10 +73,10 @@ namespace GDB.Planetary
             ecb = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>()
                 .CreateCommandBuffer();
 
-            if (curStep == GenStep.GetFinish)
+            if (curStep == GenStep.GenFinish)
                 return;
 
-            if (baseCube == Entity.Null)
+            if (!cubesInited)
             {
                 foreach (var prefabBuffer in SystemAPI.Query<DynamicBuffer<PrefabBufferElement>>())
                 {
@@ -90,135 +85,142 @@ namespace GDB.Planetary
 
                     foreach (var c in prefabBuffer)
                     {
-                        if (c.cubeType == CubeType.Ice)
-                        {
-                            baseCube = c.Prefab;
-                        }
-                        else if (c.cubeType == CubeType.Sand)
-                        {
-                            sandCube = c.Prefab;
-                        }
-                        else if (c.cubeType == CubeType.Rock)
-                        {
-                            rockCube = c.Prefab;
-                        }
-                        else if (c.cubeType == CubeType.Resource)
-                        {
-                            ResourceCube = c.Prefab;
-                        }
+                        if (!cubeEntities.ContainsKey(c.cubeType))
+                            cubeEntities[c.cubeType] = new List<Entity>();
 
-                        if (baseCube != Entity.Null && sandCube != Entity.Null && rockCube != Entity.Null &&
-                            ResourceCube != Entity.Null)
-                        {
-                            break;
-                        }
+                        cubeEntities[c.cubeType].Add(c.Prefab);
                     }
                 }
 
-                // Создаем центральный блок вручную
-                CreateCube(center, baseCube, ecb);
-                TryProcessTreeNode(2, 6, 6);
-            }
+                cubesInited = true;
 
-            if (baseCube == Entity.Null)
-                return;
+                // Создаем центральный блок вручную
+                CreateCube(center, CubeType.Ice, ecb);
+                TryProcessTreeNode(2, 6, 6);
+                cubesInited = true;
+            }
 
             switch (curStep)
             {
                 case GenStep.GenSandPoints:
-                    uint maxRadius = 100;
-                    uint maxNeighbors = 5;
+                    uint maxRadius = 200;
+                    uint maxNeighbors = 1;
                     uint minNeighbors = 1;
 
                     if (!TryProcessTreeNode(maxRadius, minNeighbors, maxNeighbors))
                     {
-                        curStep = GenStep.GenSandCubes;
-                        curBox = 0;
-                        queueNodes.Clear();
-                        Debug.LogError("Completed points!");
+                        curCenter++;
+                        if (curCenter < maxCenters)
+                        {
+                            int element = UnityEngine.Random.Range((int)(nodes.Count * 0.5f), nodes.Count);
+                            queueNodes.Enqueue((0, nodes.Keys.ElementAt(element)));
+                            queueNodes.Enqueue((0, nodes.Keys.ElementAt(element - 1)));
+                            queueNodes.Enqueue((0, nodes.Keys.ElementAt(element - 2)));
+
+                        }
+                        else
+                        {
+                            curStep = GenStep.GenResourcesPoints;
+                            resCount = 0;
+                            queueNodes.Clear();
+                            Debug.LogError("Completed sand points!");
+                        }
                     }
 
-                    break;
-
-                case GenStep.GenSandCubes:
-                    var point = sandNodes.Keys.ElementAt(curBox);
-                    sandNodes[point] = CreateCube(point, sandCube, ecb);
-                    curBox++;
-
-                    if (curBox >= sandNodes.Count)
-                        curStep = GenStep.GenResourcesPoints;
                     break;
 
                 case GenStep.GenResourcesPoints:
-                    uint maxBlocks = 10;
-                    uint maxResNeighbors = 4;
-                    uint minResNeighbors = 1;
+                    uint maxBlocks = 30;
+                    uint maxResNeighbors = 5;
+                    uint minResNeighbors = 2;
 
                     if (!TryAddResourceBlocks(maxBlocks, minResNeighbors, maxResNeighbors))
-                    {
-                        curBox = 0;
-                        curStep = GenStep.GenResourceCube;
-                    }
-
-                    break;
-
-                case GenStep.GenResourceCube:
-
-                    var resPoint = resourceNodes.Keys.ElementAt(curBox);
-
-                    curBox++;
-                    if (resourceNodes[resPoint] != Entity.Null)
-                        return;
-                    
-                    resourceNodes[resPoint] = CreateCube(resPoint, ResourceCube, ecb);
-
-                    if (curBox >= resourceNodes.Count)
                     {
                         curResCount++;
                         if (curResCount >= maxResources)
                         {
-                            curStep = GenStep.GetFinish;
-                            Debug.LogError("Completed cubes!");
+                            curStep = GenStep.GenUnbreakPoints;
+                            curBox = 0;
+                            Debug.LogError("Completed resource points!");
                         }
                         else
                         {
-                            resourceNodes.Clear();
+                            resCount = 0;
                             queueNodes.Clear();
                             initedResources = false;
                             curStep = GenStep.GenResourcesPoints;
                         }
                     }
+
+                    break;
+
+                case GenStep.GenUnbreakPoints:
+
+                    uint depthMax = 20;
+                    uint entrancesCount = 5;
+                    CubeType type = CubeType.Rock;
+
+                    if (!TryGenerateUnbreakableTerrain(type))
+                    {
+                        Debug.LogError("Completed unbreaks points!");
+                        curStep = GenStep.GenUnbreakSecond;
+                    }
+
+                    break;
+                
+                case GenStep.GenUnbreakSecond:
+
+                    CubeType secondType = CubeType.Rock;
+
+                    if (!TryGenerateUnbreakableSecondTerrain(secondType))
+                    {
+                        Debug.LogError("Completed unbreaks 2 points!");
+                        curStep = GenStep.GenCubeEntities;
+                    }
+
+                    break;
+                
+                case GenStep.GenCubeEntities:
+
+                    var resPoint = nodes.Keys.ElementAt(curBox);
+
+                    curBox++;
+                    CreateCube(resPoint, nodes[resPoint], ecb);
+
+                    if (curBox >= nodes.Count)
+                    {
+                        curStep = GenStep.GenFinish;
+                        Debug.LogError("Completed cubes generations!");
+                    }
+
                     break;
             }
         }
 
         public bool TryAddResourceBlocks(uint maxBlocks, uint minNeighbors, uint maxNeighbors)
         {
-            if (sandNodes.Count == 0 || maxBlocks == 0)
+            if (nodes.Count == 0 || maxBlocks == 0)
                 return false;
 
-            Random random = new Random((uint)System.DateTime.UtcNow.Millisecond + 2);
-            
+            Random random = new Random((uint)System.DateTime.UtcNow.Ticks);
+
             if (!initedResources)
             {
-                int startIndex = random.NextInt(0, sandNodes.Count);
-                float3 startPos = sandNodes.Keys.ElementAt(startIndex);
+                int startIndex = random.NextInt(0, nodes.Count);
+                float3 startPos = nodes.Keys.ElementAt(startIndex);
 
-                if (resourceNodes.ContainsKey(startPos))
-                    return true;
-                
                 queueNodes.Enqueue((0, startPos));
-                resourceNodes[startPos] = Entity.Null;
+                nodes[startPos] = CubeType.Resource;
                 initedResources = true;
             }
 
-            if(queueNodes.Count > 0)
+            if (queueNodes.Count > 0)
             {
                 var (curDepth, curPos) = queueNodes.Dequeue();
-                
+
                 if (curDepth >= maxBlocks)
                     return true;
-        
+
                 uint neighborsCount = random.NextUInt(minNeighbors, maxNeighbors);
                 List<uint> neighbors = new();
 
@@ -232,28 +234,14 @@ namespace GDB.Planetary
 
                 foreach (var neighbor in neighbors)
                 {
-                    if (resourceNodes.Count >= maxBlocks)
+                    if (resCount >= maxBlocks)
                         continue;
-                    
+
+                    resCount++;
+
                     float3 newPoint = curPos + directions[(int)neighbor];
-
-                    if (resourceNodes.ContainsKey(newPoint))
-                        continue;
-
-                    if (sandNodes.ContainsKey(newPoint))
-                    {
-                        if (sandNodes[newPoint] != Entity.Null)
-                        {
-                            ecb.DestroyEntity(sandNodes[newPoint]);
-                        }
-
-                        sandNodes.Remove(newPoint);
-                    }
-                    
                     queueNodes.Enqueue((curDepth + 1, newPoint));
-                    resourceNodes[newPoint] = Entity.Null;
-                    
-                    Debug.LogError($"Added resource node: {newPoint} for dist {curDepth + 1}");
+                    nodes[newPoint] = CubeType.Resource;
                 }
 
                 return true;
@@ -261,18 +249,18 @@ namespace GDB.Planetary
 
             return false;
         }
-        
+
         public bool TryProcessTreeNode(uint maxRadius, uint minNeighbors, uint maxNeighbors)
         {
             if (queueNodes.Count == 0)
                 return false;
 
             var (curRadius, curPos) = queueNodes.Dequeue();
-            
+
             if (curRadius >= maxRadius)
                 return true;
-            
-            Random random = new Random((uint)System.DateTime.UtcNow.Millisecond + 1);
+
+            Random random = new Random((uint)System.DateTime.UtcNow.Millisecond + curRadius);
             uint neighborsCount = random.NextUInt(minNeighbors, maxNeighbors);
 
             List<uint> neighbors = new();
@@ -283,34 +271,97 @@ namespace GDB.Planetary
                 newIndex = random.NextUInt(0, (uint)directions.Length);
                 if (neighbors.Contains(newIndex))
                     continue;
-                
+
                 neighbors.Add(newIndex);
             }
-            
-            foreach(var neighbor in neighbors)// Добавляем узел в плоский список
+
+            foreach (var neighbor in neighbors) // Добавляем узел в плоский список
             {
                 float3 point = curPos + directions[(int)neighbor];
                 queueNodes.Enqueue((curRadius + 1, point));
-                sandNodes[point] = Entity.Null;
+                nodes[point] = CubeType.Sand;
                 //Debug.LogError($"Added node: {point} for dist {curRadius + 1}");
             }
 
             return true;
         }
 
-        private Entity CreateCube(float3 pos, Entity cube, EntityCommandBuffer cBuffer)
+        private Entity CreateCube(float3 pos, CubeType type, EntityCommandBuffer cBuffer)
         {
-            Entity spawnedEntity = cBuffer.Instantiate(cube);
+            Entity spawnedEntity =
+                cBuffer.Instantiate(cubeEntities[type][UnityEngine.Random.Range(0, cubeEntities[type].Count)]);
 
             cBuffer.SetComponent(spawnedEntity, new LocalTransform
             {
                 Position = pos,
                 Rotation = quaternion.identity,
-                Scale = 1f
+                Scale = 1.05f
             });
-            
+
             //Debug.LogError($"Created cube: index {spawnedEntity.Index} for point {pos}");
             return spawnedEntity;
+        }
+
+        public bool TryGenerateUnbreakableTerrain(CubeType unbreakableType)
+        {
+            // Получаем список ключей (координат) из словаря
+            var keys = nodes.Keys.ToList();
+
+            // Если текущий индекс вышел за пределы, сбрасываем его и увеличиваем глубину
+            if (curBox >= nodes.Count)
+            {
+                curBox = 0;
+                return false;
+            }
+
+            // Берем текущую точку
+            float3 point = keys[curBox];
+
+            // Проверяем, что элемент не является неразрушимым
+            if (nodes[point] != unbreakableType)
+            {
+                // Проверяем, находится ли элемент на границе
+                foreach (var direction in directions)
+                {
+                    float3 neighbor = point + direction;
+
+                    // Если сосед отсутствует или не является неразрушимым, то это граница
+                    if (!nodes.ContainsKey(neighbor) /*|| nodes[neighbor] != unbreakableType*/)
+                    {
+                        nodes[neighbor] = unbreakableType;
+                        queueNodes.Enqueue((0, neighbor));
+                    }
+                }
+            }
+
+            // Переходим к следующему элементу
+            curBox++;
+            return true;
+        }
+        
+        public bool TryGenerateUnbreakableSecondTerrain(CubeType unbreakableType)
+        {
+            if (queueNodes.Count == 0)
+            {
+                return false;
+            }
+
+            // Берем текущую точку
+            var (dep, point) = queueNodes.Dequeue();
+
+            // Проверяем, находится ли элемент на границе
+            foreach (var direction in directions)
+            {
+                float3 neighbor = point + direction;
+
+                // Если сосед отсутствует или не является неразрушимым, то это граница
+                if (!nodes.ContainsKey(neighbor))
+                {
+                    nodes[neighbor] = unbreakableType;
+                }
+            }
+
+            return true;
         }
     }
 }
