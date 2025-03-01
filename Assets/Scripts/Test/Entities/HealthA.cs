@@ -13,8 +13,8 @@ public class HealthA : MonoBehaviour
             var entity = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(entity, new Health()
             {
-                health = authoring.health,
-                maxHealth = authoring.maxHealth,
+                Current = authoring.health,
+                Max = authoring.maxHealth,
                 onHPChanged = true,
             });
         }
@@ -23,8 +23,8 @@ public class HealthA : MonoBehaviour
 
 public struct Health: IComponentData
 {
-    public int health;
-    public int maxHealth;
+    public int Current;
+    public int Max;
 
     public bool onHPChanged;
 }

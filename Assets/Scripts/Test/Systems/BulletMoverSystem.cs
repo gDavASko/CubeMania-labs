@@ -17,14 +17,14 @@ partial struct BulletMoverSystem : ISystem
                 RefRO<Bullet>,
                 RefRO<Target>>().WithEntityAccess())
         {
-            if (target.ValueRO.targetEntity == Entity.Null)
+            if (target.ValueRO.Value == Entity.Null)
             {
                 buffer.DestroyEntity(bulletE);
                 continue;
             }
 
-            var targetTrs = SystemAPI.GetComponentRO<LocalTransform>(target.ValueRO.targetEntity);
-            var victim = SystemAPI.GetComponentRO<ShootVictim>(target.ValueRO.targetEntity);
+            var targetTrs = SystemAPI.GetComponentRO<LocalTransform>(target.ValueRO.Value);
+            var victim = SystemAPI.GetComponentRO<ShootVictim>(target.ValueRO.Value);
             var targetPoint = targetTrs.ValueRO.TransformPoint(victim.ValueRO.shootPos);
 
             float distBefore = math.distancesq(lt.ValueRO.Position, targetPoint);
@@ -45,8 +45,8 @@ partial struct BulletMoverSystem : ISystem
 
             if(math.distancesq(lt.ValueRO.Position, targetPoint) < destroyDist)
             {
-                var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.targetEntity);
-                targetHealth.ValueRW.health -= bullet.ValueRO.damage;
+                var targetHealth = SystemAPI.GetComponentRW<Health>(target.ValueRO.Value);
+                targetHealth.ValueRW.Current -= bullet.ValueRO.damage;
                 targetHealth.ValueRW.onHPChanged = true;
 
                 buffer.DestroyEntity(bulletE);

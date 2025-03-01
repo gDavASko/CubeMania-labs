@@ -44,7 +44,7 @@ partial struct FindTargetSystem : ISystem
 
                     if(SystemAPI.GetComponent<Unit>(hit.Entity).fraction == finder.ValueRO.targetFraction)
                     {
-                        target.ValueRW.targetEntity = hit.Entity;
+                        target.ValueRW.Value = hit.Entity;
                         break;
                     }
                 }

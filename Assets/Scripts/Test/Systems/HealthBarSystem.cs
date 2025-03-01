@@ -28,7 +28,7 @@ partial struct HealthBarSystem : ISystem
             if (!hp.ValueRO.onHPChanged)
                 continue;
 
-            float curPercent = (float)hp.ValueRO.health / hp.ValueRO.maxHealth;
+            float curPercent = (float)hp.ValueRO.Current / hp.ValueRO.Max;
 
             if (curPercent >= 1f)
             {

@@ -11,7 +11,7 @@ public class TargetA : MonoBehaviour
             var e = GetEntity(TransformUsageFlags.Dynamic);
             AddComponent(e, new Target()
             {
-                targetEntity = GetEntity(authoring.targetGO, TransformUsageFlags.Dynamic)
+                Value = GetEntity(authoring.targetGO, TransformUsageFlags.Dynamic)
             });
         }
     }
@@ -19,5 +19,5 @@ public class TargetA : MonoBehaviour
 
 public struct Target : IComponentData
 {
-    public Entity targetEntity;
+    public Entity Value;
 }

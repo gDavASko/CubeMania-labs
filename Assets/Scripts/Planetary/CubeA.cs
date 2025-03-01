@@ -24,4 +24,6 @@ namespace GDB.Planetary
     {
         public CubeType Type;
     }
+    
+    public struct DestroyableCube: IComponentData, IEnableableComponent{}
 }

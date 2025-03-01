@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -9,6 +8,24 @@ using Random = Unity.Mathematics.Random;
 
 namespace GDB.Planetary
 {
+    public struct GenParams
+    {
+        public CubeType MainBlockType;
+        public CubeType DestroyableBlockType;
+        public CubeType NonDestroyableBlockType;
+        public CubeType ResourcesBlockType;
+
+        public uint Centers;
+        public uint MaxRadius;
+        public uint MinNeighbors;
+        public uint MaxNeighbors;
+
+        public uint ResCount;
+        public uint MinResNeighbors;
+        public uint MaxResNeighbors;
+        public uint MaxResBlocks;
+    }
+    
     public enum GenStep
     {
         GenUnbreakPoints = -3,
@@ -22,23 +39,35 @@ namespace GDB.Planetary
 
     public partial class RantimeGeneratorS : SystemBase
     {
+        private GenParams genParams = new GenParams()
+        {
+            MainBlockType = CubeType.Ice,
+            DestroyableBlockType = CubeType.Sand,
+            NonDestroyableBlockType = CubeType.Rock,
+            ResourcesBlockType = CubeType.Resource, 
+            Centers = 5,
+            MaxRadius = 20,
+            MinNeighbors = 1,
+            MaxNeighbors = 1,
+            ResCount = 3,
+            MinResNeighbors = 2,
+            MaxResNeighbors = 5,
+            MaxResBlocks = 10,
+        };
+        
         // Создаем NativeList для результата (плоский список узлов)
         private Dictionary<float3, CubeType> nodes = new();
         private Queue<(uint, float3)> queueNodes = new();
 
         private GenStep curStep;
         private float3 center = new float3(0, 0, 0);
-        private float3 lastUnbreakPoint = new float3(0, 0, 0);
+
+        private bool genInProcess = false;
 
         private int curBox = 0;
-
         private bool cubesInited = false;
         private int resCount = 0;
-
-        private int maxCenters = 10;
         private int curCenter = 0;
-
-        private int maxResources = 10;
         private int curResCount = 0;
 
         private bool initedResources;
@@ -60,12 +89,33 @@ namespace GDB.Planetary
 
         protected override void OnCreate()
         {
+            genInProcess = true;
             base.OnCreate();
             curStep = GenStep.GenSandPoints;
             initedResources = false;
             cubesInited = false;
             curResCount = 0;
             queueNodes.Enqueue((0, center));
+        }
+
+        public void RegenerateCubes(GenParams parameters)
+        {
+            if (genInProcess)
+                return;
+            
+            genParams = parameters;
+
+            ecb = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>()
+                .CreateCommandBuffer();
+            
+            foreach (var (cube, entity) in SystemAPI.Query<Cube>().WithEntityAccess())
+            {
+                ecb.DestroyEntity(entity);
+            }
+            
+            nodes.Clear();
+            queueNodes.Clear();
+            OnCreate();
         }
 
         protected override void OnUpdate()
@@ -103,14 +153,12 @@ namespace GDB.Planetary
             switch (curStep)
             {
                 case GenStep.GenSandPoints:
-                    uint maxRadius = 200;
-                    uint maxNeighbors = 1;
-                    uint minNeighbors = 1;
-
-                    if (!TryProcessTreeNode(maxRadius, minNeighbors, maxNeighbors))
+                    if (!TryProcessTreeNode(genParams.MaxRadius, 
+                            genParams.MinNeighbors, 
+                            genParams.MaxNeighbors))
                     {
                         curCenter++;
-                        if (curCenter < maxCenters)
+                        if (curCenter < genParams.Centers)
                         {
                             int element = UnityEngine.Random.Range((int)(nodes.Count * 0.5f), nodes.Count);
                             queueNodes.Enqueue((0, nodes.Keys.ElementAt(element)));
@@ -130,14 +178,12 @@ namespace GDB.Planetary
                     break;
 
                 case GenStep.GenResourcesPoints:
-                    uint maxBlocks = 30;
-                    uint maxResNeighbors = 5;
-                    uint minResNeighbors = 2;
-
-                    if (!TryAddResourceBlocks(maxBlocks, minResNeighbors, maxResNeighbors))
+                    if (!TryAddResourceBlocks(genParams.MaxResBlocks, 
+                            genParams.MinResNeighbors, 
+                            genParams.MaxResNeighbors))
                     {
                         curResCount++;
-                        if (curResCount >= maxResources)
+                        if (curResCount >= genParams.ResCount)
                         {
                             curStep = GenStep.GenUnbreakPoints;
                             curBox = 0;
@@ -155,9 +201,6 @@ namespace GDB.Planetary
                     break;
 
                 case GenStep.GenUnbreakPoints:
-
-                    uint depthMax = 20;
-                    uint entrancesCount = 5;
                     CubeType type = CubeType.Rock;
 
                     if (!TryGenerateUnbreakableTerrain(type))
@@ -191,6 +234,7 @@ namespace GDB.Planetary
                     {
                         curStep = GenStep.GenFinish;
                         Debug.LogError("Completed cubes generations!");
+                        genInProcess = false;
                     }
 
                     break;

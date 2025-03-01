@@ -15,7 +15,7 @@ partial struct HealthDeadTestSystem : ISystem
 
         foreach (var (health, entity) in SystemAPI.Query<RefRO<Health>>().WithEntityAccess())
         {
-            if (health.ValueRO.health <= 0f)
+            if (health.ValueRO.Current <= 0f)
             {
                 commands.DestroyEntity(entity);
             }

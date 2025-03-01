@@ -21,10 +21,10 @@ partial struct MeleeAttackSystem : ISystem
                     RefRW<UnitMover>>()
                     .WithDisabled<MoveOverride>())
         {
-            if (target.ValueRO.targetEntity == Entity.Null)
+            if (target.ValueRO.Value == Entity.Null)
                 continue;
 
-            var targetTrs = state.EntityManager.GetComponentData<LocalTransform>(target.ValueRO.targetEntity);
+            var targetTrs = state.EntityManager.GetComponentData<LocalTransform>(target.ValueRO.Value);
 
             bool isNear = math.distance(trs.ValueRO.Position, targetTrs.Position) <= 2f;
 
@@ -47,7 +47,7 @@ partial struct MeleeAttackSystem : ISystem
                 {
                     foreach (var hit in hits)
                     {
-                        if (hit.Entity == target.ValueRO.targetEntity)
+                        if (hit.Entity == target.ValueRO.Value)
                         {
                             isTouch = true;
                             break;
@@ -86,8 +86,8 @@ partial struct MeleeAttackSystem : ISystem
 
             mAtacker.ValueRW.timer = mAtacker.ValueRO.timerMax;
 
-            var health = SystemAPI.GetComponentRW<Health>(target.ValueRO.targetEntity);
-            health.ValueRW.health -= mAtacker.ValueRO.damage;
+            var health = SystemAPI.GetComponentRW<Health>(target.ValueRO.Value);
+            health.ValueRW.Current -= mAtacker.ValueRO.damage;
             health.ValueRW.onHPChanged = true;
         }
     }
