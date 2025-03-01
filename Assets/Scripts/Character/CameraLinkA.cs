@@ -7,17 +7,12 @@ namespace GDB.Character
 {
     public class CameraLinkA : MonoBehaviour
     {
-        [SerializeField] public Vector3 Offset;
-
         public class Baker : Baker<CameraLinkA>
         {
             public override void Bake(CameraLinkA authoring)
             {
                 var e = GetEntity(TransformUsageFlags.Dynamic);
-                var Link = new CameraLink()
-                {
-                    Offfset = authoring.Offset
-                };
+                var Link = new CameraLink();
                 
                 AddComponentObject(e, Link);
             }
@@ -27,6 +22,5 @@ namespace GDB.Character
     public class CameraLink : IComponentData
     {
         public CinemachineCamera Camera;
-        public float3 Offfset;
     }
 }

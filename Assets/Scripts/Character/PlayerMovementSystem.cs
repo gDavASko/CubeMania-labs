@@ -1,8 +1,8 @@
-using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
+using Unity.Physics.Extensions;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace GDB.Character
 {
@@ -10,27 +10,48 @@ namespace GDB.Character
     {
         public void OnUpdate(ref SystemState state)
         {
-            var player = SystemAPI.ManagedAPI.GetSingleton<PlayerLink>();
-            
-            foreach (var (input, characterState, transform) in
-                     SystemAPI.Query<RefRO<PlayerInputData>, RefRO<PlayerSettings>, RefRW<LocalTransform>>())
+            var physicsWorld = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+
+            foreach (var (input, characterState, 
+                         transform, physVel) in
+                     SystemAPI.Query<RefRO<PlayerInputData>,
+                         RefRO<PlayerSettings>,
+                         RefRW<LocalTransform>,
+                         RefRW<PhysicsVelocity>>())
             {
                 float3 forward = math.mul(transform.ValueRO.Rotation, new float3(0, 0, 1)); // Направление вперед
                 float3 right = math.mul(transform.ValueRO.Rotation, new float3(1, 0, 0)); // Направление вправо
 
                 float3 movement = forward * input.ValueRO.Move.y + right * input.ValueRO.Move.x;
-                movement.y = 0; // Оставляем движение в 2D плоскости
-
-                transform.ValueRW.Position += movement * characterState.ValueRO.MoveSpeed * SystemAPI.Time.DeltaTime;
+                movement.y = 0;
 
                 // Применяем скорость к Rigidbody
-                //player.Rigidbody.linearVelocity = movement * characterState.ValueRO.MoveSpeed /** SystemAPI.Time.DeltaTime*/;
-                
-                //Debug.LogError($"Move velocity is {movement * characterState.ValueRO.MoveSpeed} and real velocity is {player.Rigidbody.linearVelocity}");
+                physVel.ValueRW.Linear.xz = movement.xz * characterState.ValueRO.MoveSpeed * SystemAPI.Time.DeltaTime;
             }
         }
     }
 
+    partial struct PlayerJumpSystem : ISystem
+    {
+        public void OnUpdate(ref SystemState state)
+        {
+            var physicsWorld = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+
+            foreach (var (input, characterState, 
+                         physVel, mass) in
+                     SystemAPI.Query<RefRO<PlayerInputData>,
+                         RefRO<PlayerSettings>,
+                         RefRW<PhysicsVelocity>,
+                         RefRO<PhysicsMass>>())
+            {
+                if (input.ValueRO.Jump && physVel.ValueRO.Linear.y <= 0.01f)
+                {
+                    physVel.ValueRW.Linear.y = characterState.ValueRO.JumpForce * mass.ValueRO.InverseMass;
+                }
+            }
+        }
+    }
+    
     public partial struct PlayerLookSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)
@@ -60,6 +81,23 @@ namespace GDB.Character
                 
                 // Применяем вращение через angularVelocity
                 //player.Rigidbody.MoveRotation( math.mul(yRotation, xRotation));
+            }
+        }
+    }
+
+    public partial class GravitySystem : SystemBase
+    {
+        protected override void OnUpdate()
+        {
+            var physicsWorld = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+            
+            foreach (var (player, phys, mass, entity) in SystemAPI
+                         .Query<RefRW<PlayerControl>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>().WithEntityAccess())
+            {
+                var idx = physicsWorld.GetRigidBodyIndex(entity);
+                physicsWorld.ApplyLinearImpulse(idx, math.up() * -9.81f / mass.ValueRO.InverseMass + phys.ValueRW.Linear);
+                
+                //phys.ValueRW.Linear += new float3(0, -9.81f / mass.ValueRO.InverseMass, 0);
             }
         }
     }

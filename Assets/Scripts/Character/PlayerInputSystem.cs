@@ -12,6 +12,7 @@ namespace GDB.Character
         private InputAction moveAction;
         private InputAction lookAction;
         private InputAction jumpAction;
+        private InputAction sitAction;
         private InputAction toggleViewAction;
 
         protected override void OnCreate()
@@ -21,6 +22,7 @@ namespace GDB.Character
             moveAction = playerInput.Player.Move;
             lookAction = playerInput.Player.PointerPosition;
             jumpAction = playerInput.Player.Jump;
+            sitAction = playerInput.Player.Sit;
             toggleViewAction = playerInput.Player.SwitchCam;
 
             playerInput.Enable();
@@ -33,6 +35,7 @@ namespace GDB.Character
                 input.ValueRW.Move = moveAction.ReadValue<Vector2>();
                 input.ValueRW.Look = lookAction.ReadValue<Vector2>();
                 input.ValueRW.Jump = jumpAction.WasPressedThisFrame();
+                input.ValueRW.Sit = sitAction.IsPressed();
             
                 if (toggleViewAction.WasPressedThisFrame())
                 {

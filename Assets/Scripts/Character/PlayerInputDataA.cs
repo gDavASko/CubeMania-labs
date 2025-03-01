@@ -21,6 +21,7 @@ namespace GDB.Character
         public float2 Move; // Вектор движения (WASD)
         public float2 Look; // Вектор вращения камеры (мышь)
         public bool Jump; // Прыжок
+        public bool Sit; // Прыжок
         public bool IsThirdPerson; // Переключение вида камеры
     }
 }

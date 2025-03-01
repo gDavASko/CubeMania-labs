@@ -40,9 +40,9 @@ namespace GDB
                 },
                 {
                     ""name"": ""Jump"",
-                    ""type"": ""Value"",
+                    ""type"": ""Button"",
                     ""id"": ""1ed92d23-d71d-4169-bcfa-c146f44371cd"",
-                    ""expectedControlType"": ""Axis"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -73,6 +73,15 @@ namespace GDB
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sit"",
+                    ""type"": ""Button"",
+                    ""id"": ""50a35fcd-24af-4d46-87a9-ffac7423dfbc"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -83,28 +92,6 @@ namespace GDB
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard+Mouse"",
-                    ""action"": ""Jump"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b00043cf-d6cc-45d6-95e4-2ccfabca7877"",
-                    ""path"": ""<Gamepad>/buttonEast"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""GamePad"",
-                    ""action"": ""Jump"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""0d6346bd-618d-4068-b45f-83230006109e"",
-                    ""path"": ""<Touchscreen>/delta/up"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""TouchScreen"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -339,6 +326,17 @@ namespace GDB
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""73ca1f1f-5715-4a19-a811-2819c0976a22"",
+                    ""path"": ""<Keyboard>/ctrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard+Mouse"",
+                    ""action"": ""Sit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -391,6 +389,7 @@ namespace GDB
             m_Player_Shoot = m_Player.FindAction("Shoot", throwIfNotFound: true);
             m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
             m_Player_SwitchCam = m_Player.FindAction("SwitchCam", throwIfNotFound: true);
+            m_Player_Sit = m_Player.FindAction("Sit", throwIfNotFound: true);
         }
 
         ~@BaseInputActions()
@@ -462,6 +461,7 @@ namespace GDB
         private readonly InputAction m_Player_Shoot;
         private readonly InputAction m_Player_PointerPosition;
         private readonly InputAction m_Player_SwitchCam;
+        private readonly InputAction m_Player_Sit;
         public struct PlayerActions
         {
             private @BaseInputActions m_Wrapper;
@@ -471,6 +471,7 @@ namespace GDB
             public InputAction @Shoot => m_Wrapper.m_Player_Shoot;
             public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
             public InputAction @SwitchCam => m_Wrapper.m_Player_SwitchCam;
+            public InputAction @Sit => m_Wrapper.m_Player_Sit;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -495,6 +496,9 @@ namespace GDB
                 @SwitchCam.started += instance.OnSwitchCam;
                 @SwitchCam.performed += instance.OnSwitchCam;
                 @SwitchCam.canceled += instance.OnSwitchCam;
+                @Sit.started += instance.OnSit;
+                @Sit.performed += instance.OnSit;
+                @Sit.canceled += instance.OnSit;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -514,6 +518,9 @@ namespace GDB
                 @SwitchCam.started -= instance.OnSwitchCam;
                 @SwitchCam.performed -= instance.OnSwitchCam;
                 @SwitchCam.canceled -= instance.OnSwitchCam;
+                @Sit.started -= instance.OnSit;
+                @Sit.performed -= instance.OnSit;
+                @Sit.canceled -= instance.OnSit;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -565,6 +572,7 @@ namespace GDB
             void OnShoot(InputAction.CallbackContext context);
             void OnPointerPosition(InputAction.CallbackContext context);
             void OnSwitchCam(InputAction.CallbackContext context);
+            void OnSit(InputAction.CallbackContext context);
         }
     }
 }
