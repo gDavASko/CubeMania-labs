@@ -157,7 +157,7 @@ namespace GDB
                     ""path"": ""<Keyboard>/i"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Keyboard+Mouse"",
                     ""action"": ""SwitchCam"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

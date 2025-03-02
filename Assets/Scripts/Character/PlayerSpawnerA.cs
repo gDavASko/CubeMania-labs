@@ -7,7 +7,8 @@ namespace GDB.Character
     {
         [SerializeField] public GameObject PlayerPrefab;
         [SerializeField] public GameObject CameraMain;
-        [SerializeField] public GameObject VirtualCamera;
+        [SerializeField] public GameObject VirtualCameraFP;
+        [SerializeField] public GameObject VirtualCameraTP;
 
         public class Baker : Baker<PlayerSpawnerA>
         {
@@ -19,7 +20,8 @@ namespace GDB.Character
                 {
                     PlayerPrefab = authoring.PlayerPrefab,
                     CameraMain = authoring.CameraMain,
-                    VirtualCamera = authoring.VirtualCamera,
+                    VirtualCameraFP = authoring.VirtualCameraFP,
+                    VirtualCameraTP = authoring.VirtualCameraTP
                 };
                 AddComponentObject(e, Link);
             }
@@ -30,6 +32,7 @@ namespace GDB.Character
     {
         public GameObject PlayerPrefab;
         public GameObject CameraMain;
-        public GameObject VirtualCamera;
+        public GameObject VirtualCameraFP;
+        public GameObject VirtualCameraTP;
     }
 }

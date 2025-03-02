@@ -16,21 +16,52 @@ namespace GDB.Character
             var spawner = SystemAPI.ManagedAPI.GetSingleton<PlayerPrefabs>();
 
             GameObject.Instantiate(spawner.CameraMain);
-            var camlink = GameObject.Instantiate(spawner.VirtualCamera);
+            var camlinkFP = GameObject.Instantiate(spawner.VirtualCameraFP);
+            var camlinkTP = GameObject.Instantiate(spawner.VirtualCameraTP);
             var player = GameObject.Instantiate(spawner.PlayerPrefab);
 
             var playerLink = SystemAPI.ManagedAPI.GetSingleton<PlayerLink>();
             playerLink.Link = player;
             
             var camLinkE = SystemAPI.ManagedAPI.GetSingleton<CameraLink>();
-            camLinkE.Camera = camlink.GetComponentInChildren<CinemachineCamera>();
+            camLinkE.CameraFP = camlinkFP.GetComponentInChildren<CinemachineCamera>();
+            camLinkE.CameraTP = camlinkTP.GetComponentInChildren<CinemachineCamera>();
+            
+            
 
-            var target = camLinkE.Camera.Target;
+            var target = camLinkE.CameraFP.Target;
             target.TrackingTarget = player.transform;
+            camLinkE.CameraFP.Target = target;
+            
+            target = camLinkE.CameraTP.Target;
+            target.TrackingTarget = player.transform;
+            camLinkE.CameraTP.Target = target;
 
-            camLinkE.Camera.Target = target;
+            camLinkE.CameraFP.Priority = 10;
+            camLinkE.CameraTP.Priority = 0;
             
             spawned = true;
+        }
+    }
+    
+    [UpdateInGroup(typeof(LateSimulationSystemGroup))]
+    public partial class ChangeCameraSystem : SystemBase
+    {
+        protected override void OnUpdate()
+        {
+            foreach (var input in SystemAPI.Query<RefRW<PlayerInputData>>())
+            {
+                if (input.ValueRO.CamChangeNeedProcess)
+                {
+                    var camLinkE = SystemAPI.ManagedAPI.GetSingleton<CameraLink>();
+                    var priorityFP = camLinkE.CameraFP.Priority;
+                    camLinkE.CameraFP.Priority = camLinkE.CameraTP.Priority;
+                    camLinkE.CameraTP.Priority = priorityFP;
+
+                    input.ValueRW.CamChangeNeedProcess = false;
+                    break;
+                }
+            }
         }
     }
 }

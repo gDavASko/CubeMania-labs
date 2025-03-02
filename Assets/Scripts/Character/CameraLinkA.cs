@@ -21,6 +21,7 @@ namespace GDB.Character
 
     public class CameraLink : IComponentData
     {
-        public CinemachineCamera Camera;
+        public CinemachineCamera CameraFP;
+        public CinemachineCamera CameraTP;
     }
 }

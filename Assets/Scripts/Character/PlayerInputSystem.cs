@@ -39,7 +39,7 @@ namespace GDB.Character
             
                 if (toggleViewAction.WasPressedThisFrame())
                 {
-                    input.ValueRW.IsThirdPerson = !input.ValueRW.IsThirdPerson;
+                    input.ValueRW.CamChangeNeedProcess = true;
                 }
             }
         }

@@ -452,7 +452,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 4167588886508572588, guid: 13d67f6a582b4604e8138eb42b5a08e7, type: 3}
   CameraMain: {fileID: 5307986175053428929, guid: 2ff8d4d683a30ba4cbab37bdbc54db73, type: 3}
-  VirtualCamera: {fileID: 2435374711916980659, guid: d3537f0dd176ef3439551a9835277417, type: 3}
+  VirtualCameraFP: {fileID: 2435374711916980659, guid: d3537f0dd176ef3439551a9835277417, type: 3}
+  VirtualCameraTP: {fileID: 2435374711916980659, guid: f7104728a63e6b84aa88ec025c3069c1, type: 3}
 --- !u!114 &2081610907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -494,7 +495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <MoveSpeed>k__BackingField: 1000
   <JumpForce>k__BackingField: 800
-  <LookSensitivity>k__BackingField: 0.01
+  <LookSensitivity>k__BackingField: 0.002
 --- !u!1 &5584708231985132965
 GameObject:
   m_ObjectHideFlags: 0
