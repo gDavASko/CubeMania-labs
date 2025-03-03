@@ -12,6 +12,7 @@ namespace GDB.Character
         private InputAction moveAction;
         private InputAction lookAction;
         private InputAction jumpAction;
+        private InputAction shootAction;
         private InputAction sitAction;
         private InputAction toggleViewAction;
 
@@ -22,6 +23,7 @@ namespace GDB.Character
             moveAction = playerInput.Player.Move;
             lookAction = playerInput.Player.PointerPosition;
             jumpAction = playerInput.Player.Jump;
+            shootAction = playerInput.Player.Shoot;
             sitAction = playerInput.Player.Sit;
             toggleViewAction = playerInput.Player.SwitchCam;
 
@@ -35,6 +37,7 @@ namespace GDB.Character
                 input.ValueRW.Move = moveAction.ReadValue<Vector2>();
                 input.ValueRW.Look = lookAction.ReadValue<Vector2>();
                 input.ValueRW.Jump = jumpAction.WasPressedThisFrame();
+                input.ValueRW.ShootButton = shootAction.WasPressedThisFrame();
                 input.ValueRW.Sit = sitAction.IsPressed();
             
                 if (toggleViewAction.WasPressedThisFrame())
