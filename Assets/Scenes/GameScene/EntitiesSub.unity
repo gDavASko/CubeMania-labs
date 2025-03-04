@@ -404,6 +404,7 @@ MonoBehaviour:
   <MoveSpeed>k__BackingField: 1000
   <JumpForce>k__BackingField: 800
   <LookSensitivity>k__BackingField: 0.002
+  <UseGravity>k__BackingField: 0
 --- !u!1 &5584708231985132965
 GameObject:
   m_ObjectHideFlags: 0
@@ -453,15 +454,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 401298, guid: 5dbc04a447802934a8628f151ef97abb, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 401298, guid: 5dbc04a447802934a8628f151ef97abb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 401298, guid: 5dbc04a447802934a8628f151ef97abb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 401298, guid: 5dbc04a447802934a8628f151ef97abb, type: 3}
       propertyPath: m_LocalRotation.w

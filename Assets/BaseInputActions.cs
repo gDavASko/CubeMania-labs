@@ -82,6 +82,15 @@ namespace GDB
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""ChangeCursorLock"",
+                    ""type"": ""Button"",
+                    ""id"": ""c638d98e-fa69-4117-9dce-009e5ed6e626"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -337,6 +346,17 @@ namespace GDB
                     ""action"": ""Sit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b5e37b81-eb3e-4c42-8c46-1af9fa71eca8"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard+Mouse"",
+                    ""action"": ""ChangeCursorLock"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -390,6 +410,7 @@ namespace GDB
             m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
             m_Player_SwitchCam = m_Player.FindAction("SwitchCam", throwIfNotFound: true);
             m_Player_Sit = m_Player.FindAction("Sit", throwIfNotFound: true);
+            m_Player_ChangeCursorLock = m_Player.FindAction("ChangeCursorLock", throwIfNotFound: true);
         }
 
         ~@BaseInputActions()
@@ -462,6 +483,7 @@ namespace GDB
         private readonly InputAction m_Player_PointerPosition;
         private readonly InputAction m_Player_SwitchCam;
         private readonly InputAction m_Player_Sit;
+        private readonly InputAction m_Player_ChangeCursorLock;
         public struct PlayerActions
         {
             private @BaseInputActions m_Wrapper;
@@ -472,6 +494,7 @@ namespace GDB
             public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
             public InputAction @SwitchCam => m_Wrapper.m_Player_SwitchCam;
             public InputAction @Sit => m_Wrapper.m_Player_Sit;
+            public InputAction @ChangeCursorLock => m_Wrapper.m_Player_ChangeCursorLock;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -499,6 +522,9 @@ namespace GDB
                 @Sit.started += instance.OnSit;
                 @Sit.performed += instance.OnSit;
                 @Sit.canceled += instance.OnSit;
+                @ChangeCursorLock.started += instance.OnChangeCursorLock;
+                @ChangeCursorLock.performed += instance.OnChangeCursorLock;
+                @ChangeCursorLock.canceled += instance.OnChangeCursorLock;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -521,6 +547,9 @@ namespace GDB
                 @Sit.started -= instance.OnSit;
                 @Sit.performed -= instance.OnSit;
                 @Sit.canceled -= instance.OnSit;
+                @ChangeCursorLock.started -= instance.OnChangeCursorLock;
+                @ChangeCursorLock.performed -= instance.OnChangeCursorLock;
+                @ChangeCursorLock.canceled -= instance.OnChangeCursorLock;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -573,6 +602,7 @@ namespace GDB
             void OnPointerPosition(InputAction.CallbackContext context);
             void OnSwitchCam(InputAction.CallbackContext context);
             void OnSit(InputAction.CallbackContext context);
+            void OnChangeCursorLock(InputAction.CallbackContext context);
         }
     }
 }

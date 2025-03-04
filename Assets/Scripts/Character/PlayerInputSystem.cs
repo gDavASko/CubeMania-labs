@@ -15,6 +15,7 @@ namespace GDB.Character
         private InputAction shootAction;
         private InputAction sitAction;
         private InputAction toggleViewAction;
+        private InputAction cursorLockAction;
 
         protected override void OnCreate()
         {
@@ -26,6 +27,7 @@ namespace GDB.Character
             shootAction = playerInput.Player.Shoot;
             sitAction = playerInput.Player.Sit;
             toggleViewAction = playerInput.Player.SwitchCam;
+            cursorLockAction = playerInput.Player.ChangeCursorLock;
 
             playerInput.Enable();
         }
@@ -40,6 +42,7 @@ namespace GDB.Character
                 input.ValueRW.JumpUngravity = jumpAction.IsPressed();
                 input.ValueRW.ShootButton = shootAction.IsPressed();
                 input.ValueRW.Sit = sitAction.IsPressed();
+                input.ValueRW.CursorLock = !cursorLockAction.IsPressed();
             
                 if (toggleViewAction.WasPressedThisFrame())
                 {

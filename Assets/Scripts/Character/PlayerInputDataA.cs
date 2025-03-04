@@ -25,5 +25,6 @@ namespace GDB.Character
         public bool Sit; // Прыжок
         public bool ShootButton; // Атака
         public bool CamChangeNeedProcess;
+        public bool CursorLock;
     }
 }
