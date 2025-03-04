@@ -10,13 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 446300}
   - component: {fileID: -3323084167606948227}
+  - component: {fileID: 1831238726953054214}
   - component: {fileID: -7918546181888648503}
-  - component: {fileID: -7693647642731927948}
   - component: {fileID: 9183925508600542342}
   - component: {fileID: 3305928}
   - component: {fileID: 2380076}
-  - component: {fileID: -8693742968021369118}
-  - component: {fileID: 1831238726953054214}
   m_Layer: 7
   m_Name: Water
   m_TagString: Cube
@@ -52,6 +50,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
+--- !u!114 &1831238726953054214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ea4a559ed99e543bcc74daf026730b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damageType: 0000000001000000
+  _maxHealth: 100
 --- !u!114 &-7918546181888648503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,33 +76,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b4a216dfda692244b85628183ec425b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!54 &-7693647642731927948
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 129132}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!65 &9183925508600542342
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -128,12 +113,12 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129132}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
@@ -165,29 +150,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-8693742968021369118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 129132}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c16549610bfe4458aa9389201d072bb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1831238726953054214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 129132}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49ea4a559ed99e543bcc74daf026730b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _damageType: 0000000001000000
-  _maxHealth: 100
