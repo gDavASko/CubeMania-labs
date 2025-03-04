@@ -3,23 +3,27 @@ using UnityEngine;
 
 namespace GDB.Character
 {
-    public class PlayersettingsA : MonoBehaviour
+    public class PlayerSettingsA : MonoBehaviour
     {
         [field: SerializeField] public float MoveSpeed { get; private set; }
         [field: SerializeField] public float JumpForce { get; private set; }
         [field: SerializeField] public float LookSensitivity { get; private set; }
         
-        public class Baker : Baker<PlayersettingsA>
+        [field: SerializeField] public bool UseGravity { get; private set; }
+        
+        public class Baker : Baker<PlayerSettingsA>
         {
 
-            public override void Bake(PlayersettingsA authoring)
+            public override void Bake(PlayerSettingsA authoring)
             {
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 AddComponent(entity, new PlayerSettings
                 {
                     MoveSpeed = authoring.MoveSpeed,
                     JumpForce = authoring.JumpForce,
-                    LookSensitivity = authoring.LookSensitivity
+                    LookSensitivity = authoring.LookSensitivity,
+                    IsFirstPerson = true,
+                    UseGravity = authoring.UseGravity,
                 });
             }
             
@@ -32,5 +36,6 @@ namespace GDB.Character
         public float LookSensitivity; // Чувствительность камеры
         public float JumpForce; // Сила прыжка
         public bool IsFirstPerson; // Текущий вид камеры
+        public bool UseGravity;
     }
 }

@@ -1,5 +1,4 @@
 using GDB.Character;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -7,7 +6,7 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
-public partial struct PlayerShootSystem : ISystem
+public partial struct PlayerAttackSystem : ISystem
 {
     private EntityQuery _playerQuery;
     private EntityQuery _damagableQuery;
@@ -28,16 +27,24 @@ public partial struct PlayerShootSystem : ISystem
 
     public void OnUpdate(ref SystemState state)
     {
-        if (_playerQuery.IsEmpty || _damagableQuery.IsEmpty) return;
+        if (_playerQuery.IsEmpty || _damagableQuery.IsEmpty) 
+            return;
 
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
         var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
 
-        foreach (var (inputData, transform, entity) 
-                 in SystemAPI.Query<RefRO<PlayerInputData>, RefRO<LocalToWorld>>().WithEntityAccess())
+        foreach (var (inputData, attacker, transform, entity) 
+                 in SystemAPI.Query<RefRO<PlayerInputData>, RefRW<PlayerAttack>, RefRO<LocalToWorld>>().WithEntityAccess())
         {
             if (!inputData.ValueRO.ShootButton)
                 continue;
+
+            attacker.ValueRW.CDTimer -= SystemAPI.Time.DeltaTime;
+            
+            if (attacker.ValueRO.CDTimer > 0)
+                continue;
+            
+            attacker.ValueRW.CDTimer = attacker.ValueRO.CDTimer;
 
             float3 origin = transform.ValueRO.Position;
             float3 direction = transform.ValueRO.Forward; // Стрелять вперёд из центра экрана

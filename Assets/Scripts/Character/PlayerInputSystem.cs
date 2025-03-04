@@ -37,7 +37,8 @@ namespace GDB.Character
                 input.ValueRW.Move = moveAction.ReadValue<Vector2>();
                 input.ValueRW.Look = lookAction.ReadValue<Vector2>();
                 input.ValueRW.Jump = jumpAction.WasPressedThisFrame();
-                input.ValueRW.ShootButton = shootAction.WasPressedThisFrame();
+                input.ValueRW.JumpUngravity = jumpAction.IsPressed();
+                input.ValueRW.ShootButton = shootAction.IsPressed();
                 input.ValueRW.Sit = sitAction.IsPressed();
             
                 if (toggleViewAction.WasPressedThisFrame())

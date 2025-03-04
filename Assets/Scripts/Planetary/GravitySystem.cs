@@ -1,46 +1,24 @@
-using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
-using Unity.Transforms;
+using Unity.Physics.Extensions;
 
-namespace GDB.Planetary
+namespace GDB.Character
 {
-    partial struct GravitySystem : ISystem
+    public partial class GravitySystem : SystemBase
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
+        protected override void OnUpdate()
         {
-
-        }
-
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
-        {
-            var physic = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-            var colls = physic.CollisionWorld;
-
-            foreach (var (gravity, trs, entity) in
-                SystemAPI.Query<RefRO<Gravity>, RefRO<LocalTransform>>().WithEntityAccess())
+            var physicsWorld = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
+            
+            foreach (var (player, phys, mass, entity) in SystemAPI
+                         .Query<RefRW<PlayerControl>, RefRW<PhysicsVelocity>, RefRO<PhysicsMass>>().WithEntityAccess())
             {
-                if(gravity.ValueRO.gravityBase == Entity.Null)
-                {
-                    continue;
-                }
-
-                var baseLt = SystemAPI.GetComponentRO<LocalTransform>(gravity.ValueRO.gravityBase);
-
-                var gravityDir = baseLt.ValueRO.Position - trs.ValueRO.Position;
-                gravityDir = math.normalize(gravityDir);
-
-
+                var idx = physicsWorld.GetRigidBodyIndex(entity);
+                physicsWorld.ApplyLinearImpulse(idx, math.up() * -9.81f / mass.ValueRO.InverseMass + phys.ValueRW.Linear);
+                
+                //phys.ValueRW.Linear += new float3(0, -9.81f / mass.ValueRO.InverseMass, 0);
             }
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-
         }
     }
 }
