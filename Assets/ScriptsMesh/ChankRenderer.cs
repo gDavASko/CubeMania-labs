@@ -3,13 +3,25 @@ using UnityEngine;
 
 namespace GDB.Meshes
 {
+    public enum BlockType: byte
+    {
+        Air = 0,
+        Stone = 1,
+        Grass = 2,
+        Sand = 4,
+        Dirt = 8,
+        Water = 16,
+    }
+    
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
         public const int ChunkWidth = 10;
         public const int ChunkHeight = 128;
+        public const float BlockScale = 1f;
 
-        public int[,,] Blocks = null;
+        public ChunkData CData = null;
+        public GameWorld World = null;
 
         private List<Vector3> vertices = new List<Vector3>();
         private List<int> triangles = new List<int>();
@@ -18,7 +30,7 @@ namespace GDB.Meshes
         {
             Mesh chunkMesh = new Mesh();
 
-            Blocks = TerrainGenerator.GenerateTerrain((int)transform.position.x, (int)transform.position.z);
+            //CData = TerrainGenerator.GenerateTerrain((int)transform.position.x, (int)transform.position.z);
 
             for (int y = 0; y < ChunkHeight; y++)
             {
@@ -34,10 +46,13 @@ namespace GDB.Meshes
             chunkMesh.vertices = vertices.ToArray();
             chunkMesh.triangles = triangles.ToArray();
             
+            chunkMesh.Optimize();
+            
             chunkMesh.RecalculateNormals();
             chunkMesh.RecalculateBounds();
 
             GetComponent<MeshFilter>().mesh = chunkMesh;
+            GetComponent<MeshCollider>().sharedMesh = chunkMesh;
         }
 
         private void GenBlock(int x, int y, int z)
@@ -54,14 +69,50 @@ namespace GDB.Meshes
             if(GetBlockInPos(pos + Vector3Int.down) == 0) GenBottomSide(pos);
         }
 
-        private int GetBlockInPos(Vector3Int pos)
+        private BlockType GetBlockInPos(Vector3Int pos)
         {
             if(pos.x >= 0 && pos.x < ChunkWidth &&
                pos.y >= 0 && pos.y < ChunkHeight &&
                pos.z >= 0 && pos.z < ChunkWidth)
-                return Blocks[pos.x, pos.y, pos.z];
-            
-            return 0;
+
+            {
+                return CData.Blocks[pos.x, pos.y, pos.z];
+            }
+            else
+            {
+                if (pos.y < 0 || pos.y >= ChunkHeight) 
+                    return BlockType.Air;
+                
+                var adjCPos = CData.Pos;
+                if (pos.x < 0)
+                {
+                    adjCPos.x--;
+                    pos.x += ChunkWidth;
+                }
+                else if (pos.x >= ChunkWidth)
+                {
+                    adjCPos.x++;
+                    pos.x -= ChunkWidth;
+                }
+                
+                if (pos.z < 0)
+                {
+                    adjCPos.y--;
+                    pos.z += ChunkWidth;
+                }
+                else if (pos.z >= ChunkWidth)
+                {
+                    adjCPos.y++;
+                    pos.z -= ChunkWidth;
+                }
+
+                if(World.ChunkDatas.TryGetValue(adjCPos, out var chunk))
+                {
+                    return chunk.Blocks[pos.x, pos.y, pos.z];
+                }
+                
+                return BlockType.Air;
+            }
         }
         
         private void AddLastVertSquare()
@@ -87,20 +138,20 @@ namespace GDB.Meshes
         
         private void GenLeftSide(Vector3Int pos)
         {
-            vertices.Add(new Vector3(0, 0, 0)+ pos);
-            vertices.Add(new Vector3(0, 0, 1)+ pos);
-            vertices.Add(new Vector3(0, 1, 0)+ pos);
-            vertices.Add(new Vector3(0, 1, 1)+ pos);
+            vertices.Add((new Vector3(0, 0, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(0, 0, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(0, 1, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
 
             AddLastVertSquare();
         }
         
         private void GenFrontSide(Vector3Int pos)
         {
-            vertices.Add(new Vector3(0, 0, 1)+ pos);
-            vertices.Add(new Vector3(1, 0, 1)+ pos);
-            vertices.Add(new Vector3(0, 1, 1)+ pos);
-            vertices.Add(new Vector3(1, 1, 1)+ pos);
+            vertices.Add((new Vector3(0, 0, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 0, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 1, 1)+ pos) * BlockScale);
             
 
             AddLastVertSquare();
@@ -108,32 +159,38 @@ namespace GDB.Meshes
         
         private void GenBackSide(Vector3Int pos)
         {
-            vertices.Add(new Vector3(0, 0, 0) + pos);
-            vertices.Add(new Vector3(0, 1, 0)+ pos);
-            vertices.Add(new Vector3(1, 0, 0)+ pos);
-            vertices.Add(new Vector3(1, 1, 0)+ pos);
+            vertices.Add((new Vector3(0, 0, 0) + pos) * BlockScale);
+            vertices.Add((new Vector3(0, 1, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 0, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 1, 0)+ pos) * BlockScale);
 
             AddLastVertSquare();
         }
         
         private void GenTopSide(Vector3Int pos)
         {
-            vertices.Add(new Vector3(0, 1, 0) + pos);
-            vertices.Add(new Vector3(0, 1, 1)+ pos);
-            vertices.Add(new Vector3(1, 1, 0)+ pos);
-            vertices.Add(new Vector3(1, 1, 1)+ pos);
+            vertices.Add((new Vector3(0, 1, 0) + pos) * BlockScale);
+            vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 1, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 1, 1)+ pos) * BlockScale);
 
             AddLastVertSquare();
         }
         
         private void GenBottomSide(Vector3Int pos)
         {
-            vertices.Add(new Vector3(0, 0, 0) + pos);
-            vertices.Add(new Vector3(1, 0, 0)+ pos);
-            vertices.Add(new Vector3(0, 0, 1)+ pos);
-            vertices.Add(new Vector3(1, 0, 1)+ pos);
+            vertices.Add((new Vector3(0, 0, 0) + pos) * BlockScale);
+            vertices.Add((new Vector3(1, 0, 0)+ pos) * BlockScale);
+            vertices.Add((new Vector3(0, 0, 1)+ pos) * BlockScale);
+            vertices.Add((new Vector3(1, 0, 1)+ pos) * BlockScale);
 
             AddLastVertSquare();
         }
+    }
+
+    public class ChunkData
+    {
+        public Vector2Int Pos;
+        public BlockType[,,] Blocks;
     }
 }

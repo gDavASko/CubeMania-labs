@@ -4,9 +4,9 @@ namespace GDB.Meshes
 {
     public static class TerrainGenerator
     {
-        public static int[,,] GenerateTerrain(int xOffset, int zOffset)
+        public static ChunkData GenerateTerrain(float xOffset, float zOffset)
         {
-            var result = new int[ChunkRenderer.ChunkWidth, ChunkRenderer.ChunkHeight, ChunkRenderer.ChunkWidth];
+            var result = new BlockType[ChunkRenderer.ChunkWidth, ChunkRenderer.ChunkHeight, ChunkRenderer.ChunkWidth];
 
             for (int x = 0; x < ChunkRenderer.ChunkWidth; x++)
             {
@@ -16,12 +16,12 @@ namespace GDB.Meshes
 
                     for (int y = 0; y < height; y++)
                     {
-                        result[x, y, z] = 1;
+                        result[x, y, z] = BlockType.Grass;
                     }
                 }
             }
 
-            return result;
+            return new ChunkData() { Blocks = result };
         }
     }
 }
