@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,12 +27,24 @@ namespace GDB.Meshes
         private List<Vector3> vertices = new List<Vector3>();
         private List<int> triangles = new List<int>();
 
+        private Mesh chunkMesh;
+
         private void Start()
         {
-            Mesh chunkMesh = new Mesh();
+            chunkMesh = new Mesh();
 
             //CData = TerrainGenerator.GenerateTerrain((int)transform.position.x, (int)transform.position.z);
 
+            RegenerateMesh();
+
+            GetComponent<MeshFilter>().mesh = chunkMesh;
+        }
+
+        private void RegenerateMesh()
+        {
+            vertices.Clear();
+            triangles.Clear();
+            
             for (int y = 0; y < ChunkHeight; y++)
             {
                 for (int x = 0; x < ChunkWidth; x++)
@@ -43,6 +56,7 @@ namespace GDB.Meshes
                 }
             }
 
+            chunkMesh.triangles = Array.Empty<int>();
             chunkMesh.vertices = vertices.ToArray();
             chunkMesh.triangles = triangles.ToArray();
             
@@ -50,11 +64,22 @@ namespace GDB.Meshes
             
             chunkMesh.RecalculateNormals();
             chunkMesh.RecalculateBounds();
-
-            GetComponent<MeshFilter>().mesh = chunkMesh;
+            
             GetComponent<MeshCollider>().sharedMesh = chunkMesh;
         }
 
+        public void SpawnBlock(Vector3Int pos)
+        {
+            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Grass;
+            RegenerateMesh();
+        }
+        
+        public void DestroyBlock(Vector3Int pos)
+        {
+            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Air;
+            RegenerateMesh();
+        }
+        
         private void GenBlock(int x, int y, int z)
         {
             var pos = new Vector3Int(x, y, z);
@@ -191,6 +216,7 @@ namespace GDB.Meshes
     public class ChunkData
     {
         public Vector2Int Pos;
+        public ChunkRenderer Renderer;
         public BlockType[,,] Blocks;
     }
 }

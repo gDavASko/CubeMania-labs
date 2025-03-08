@@ -72,7 +72,13 @@ namespace GDB.Meshes
 
         public void OnChangeCursorLock(InputAction.CallbackContext context)
         {
-        } // Заглушка
+            // Заглушка
+        }
+
+        public void OnCreate(InputAction.CallbackContext context)
+        {
+            // Заглушка
+        }
 
         void MovePlayer()
         {
@@ -86,7 +92,9 @@ namespace GDB.Meshes
             float mouseX = lookInput.x * sensitivity;
             float mouseY = lookInput.y * sensitivity;
 
-            transform.Rotate(Vector3.up * mouseX + Vector3.left * mouseY);
+            
+            
+            transform.Rotate(Vector3.up * mouseX/* + Vector3.left * mouseY*/);
 
             verticalRotation -= mouseY;
             verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);

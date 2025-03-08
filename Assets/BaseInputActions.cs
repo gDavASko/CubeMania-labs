@@ -91,6 +91,15 @@ namespace GDB
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Create"",
+                    ""type"": ""Button"",
+                    ""id"": ""af98d18d-e7a2-47b2-84d5-7b3c0c6bf305"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -119,7 +128,7 @@ namespace GDB
                 {
                     ""name"": """",
                     ""id"": ""fb5f4dfb-19ca-4958-ae85-05df16b047ff"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""GamePad"",
@@ -357,6 +366,28 @@ namespace GDB
                     ""action"": ""ChangeCursorLock"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f6d06b63-b927-4362-8ad7-55ef15a4eae7"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard+Mouse"",
+                    ""action"": ""Create"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f379d1a4-cdb1-4fc0-bdc8-7f4d8b330de8"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Create"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -411,6 +442,7 @@ namespace GDB
             m_Player_SwitchCam = m_Player.FindAction("SwitchCam", throwIfNotFound: true);
             m_Player_Sit = m_Player.FindAction("Sit", throwIfNotFound: true);
             m_Player_ChangeCursorLock = m_Player.FindAction("ChangeCursorLock", throwIfNotFound: true);
+            m_Player_Create = m_Player.FindAction("Create", throwIfNotFound: true);
         }
 
         ~@BaseInputActions()
@@ -484,6 +516,7 @@ namespace GDB
         private readonly InputAction m_Player_SwitchCam;
         private readonly InputAction m_Player_Sit;
         private readonly InputAction m_Player_ChangeCursorLock;
+        private readonly InputAction m_Player_Create;
         public struct PlayerActions
         {
             private @BaseInputActions m_Wrapper;
@@ -495,6 +528,7 @@ namespace GDB
             public InputAction @SwitchCam => m_Wrapper.m_Player_SwitchCam;
             public InputAction @Sit => m_Wrapper.m_Player_Sit;
             public InputAction @ChangeCursorLock => m_Wrapper.m_Player_ChangeCursorLock;
+            public InputAction @Create => m_Wrapper.m_Player_Create;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -525,6 +559,9 @@ namespace GDB
                 @ChangeCursorLock.started += instance.OnChangeCursorLock;
                 @ChangeCursorLock.performed += instance.OnChangeCursorLock;
                 @ChangeCursorLock.canceled += instance.OnChangeCursorLock;
+                @Create.started += instance.OnCreate;
+                @Create.performed += instance.OnCreate;
+                @Create.canceled += instance.OnCreate;
             }
 
             private void UnregisterCallbacks(IPlayerActions instance)
@@ -550,6 +587,9 @@ namespace GDB
                 @ChangeCursorLock.started -= instance.OnChangeCursorLock;
                 @ChangeCursorLock.performed -= instance.OnChangeCursorLock;
                 @ChangeCursorLock.canceled -= instance.OnChangeCursorLock;
+                @Create.started -= instance.OnCreate;
+                @Create.performed -= instance.OnCreate;
+                @Create.canceled -= instance.OnCreate;
             }
 
             public void RemoveCallbacks(IPlayerActions instance)
@@ -603,6 +643,7 @@ namespace GDB
             void OnSwitchCam(InputAction.CallbackContext context);
             void OnSit(InputAction.CallbackContext context);
             void OnChangeCursorLock(InputAction.CallbackContext context);
+            void OnCreate(InputAction.CallbackContext context);
         }
     }
 }
