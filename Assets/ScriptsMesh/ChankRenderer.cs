@@ -12,12 +12,13 @@ namespace GDB.Meshes
         Sand = 4,
         Dirt = 8,
         Water = 16,
+        Bedrock = 32,
     }
     
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
-        public const int ChunkWidth = 10;
+        public const int ChunkWidth = 32;
         public const int ChunkHeight = 128;
         public const float BlockScale = 1f;
 
@@ -25,6 +26,7 @@ namespace GDB.Meshes
         public GameWorld World = null;
 
         private List<Vector3> vertices = new List<Vector3>();
+        private List<Vector2> uvs = new List<Vector2>();
         private List<int> triangles = new List<int>();
 
         private Mesh chunkMesh;
@@ -43,6 +45,7 @@ namespace GDB.Meshes
         private void RegenerateMesh()
         {
             vertices.Clear();
+            uvs.Clear();
             triangles.Clear();
             
             for (int y = 0; y < ChunkHeight; y++)
@@ -58,6 +61,7 @@ namespace GDB.Meshes
 
             chunkMesh.triangles = Array.Empty<int>();
             chunkMesh.vertices = vertices.ToArray();
+            chunkMesh.uv = uvs.ToArray();
             chunkMesh.triangles = triangles.ToArray();
             
             chunkMesh.Optimize();
@@ -70,7 +74,7 @@ namespace GDB.Meshes
 
         public void SpawnBlock(Vector3Int pos)
         {
-            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Grass;
+            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Stone;
             RegenerateMesh();
         }
         
@@ -83,15 +87,40 @@ namespace GDB.Meshes
         private void GenBlock(int x, int y, int z)
         {
             var pos = new Vector3Int(x, y, z);
+            var blockType = GetBlockInPos(pos);
             
             if(GetBlockInPos(pos) == 0) return;
             
-            if(GetBlockInPos(pos + Vector3Int.right) == 0) GenRightSide(pos);
-            if(GetBlockInPos(pos + Vector3Int.left) == 0) GenLeftSide(pos);
-            if(GetBlockInPos(pos + Vector3Int.forward) == 0) GenFrontSide(pos);
-            if(GetBlockInPos(pos + Vector3Int.back) == 0) GenBackSide(pos);
-            if(GetBlockInPos(pos + Vector3Int.up) == 0) GenTopSide(pos);
-            if(GetBlockInPos(pos + Vector3Int.down) == 0) GenBottomSide(pos);
+            if(GetBlockInPos(pos + Vector3Int.right) == 0)
+            {
+                GenRightSide(pos);
+                AddUVs(blockType, Vector2Int.right);
+            }
+            if(GetBlockInPos(pos + Vector3Int.left) == 0)
+            {
+                GenLeftSide(pos);
+                AddUVs(blockType, Vector2Int.left);
+            }
+            if(GetBlockInPos(pos + Vector3Int.forward) == 0)
+            {
+                GenFrontSide(pos);
+                AddUVs(blockType, (Vector2Int)Vector3Int.forward);
+            }
+            if(GetBlockInPos(pos + Vector3Int.back) == 0)
+            {
+                GenBackSide(pos);
+                AddUVs(blockType, (Vector2Int)Vector3Int.back);
+            }
+            if(GetBlockInPos(pos + Vector3Int.up) == 0)
+            {
+                GenTopSide(pos);
+                AddUVs(blockType, Vector2Int.up);
+            }
+            if(GetBlockInPos(pos + Vector3Int.down) == 0)
+            {
+                GenBottomSide(pos);
+                AddUVs(blockType, Vector2Int.down);
+            }
         }
 
         private BlockType GetBlockInPos(Vector3Int pos)
@@ -150,6 +179,42 @@ namespace GDB.Meshes
             triangles.Add(vertices.Count - 1);
             triangles.Add(vertices.Count - 2);
         }
+
+        private void AddUVs(BlockType type, Vector2Int normal)
+        {
+            uvs.Add(new Vector2(0, 0));
+            uvs.Add(new Vector2(0, 1));
+            uvs.Add(new Vector2(1, 0));
+            uvs.Add(new Vector2(1, 1));
+        }
+        
+        /*private void AddUVs(BlockType blockType, Vector2Int normal)
+        {
+            Vector2 uv;
+            if (blockType == BlockType.Grass)
+            {
+                uv = normal == Vector2Int.up ? new Vector2(32f / 256, 240f / 256) :
+                    normal == Vector2Int.down ? new Vector2(32f / 256, 240f / 256) :
+                    new Vector2(32f / 256, 240f / 256);
+            }
+            else if (blockType == BlockType.Stone)
+            {
+                uv = new Vector2(16f / 256, 240f / 256);
+            }
+            else if (blockType == BlockType.Wood)
+            {
+                uv = new Vector2(64f / 256, 240f / 256);
+            }
+            else
+            {
+                uv = new Vector2(160f / 256, 224f / 256);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                uvs.Add(uv);
+            }
+        }*/
 
         private void GenRightSide(Vector3Int pos)
         {

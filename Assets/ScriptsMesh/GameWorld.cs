@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,11 +8,15 @@ namespace GDB.Meshes
 {
     public class GameWorld : MonoBehaviour
     {
+        private const int VIEW_RADIUS = 5;
+        
         public Dictionary<Vector2Int, ChunkData> ChunkDatas = new Dictionary<Vector2Int, ChunkData>();
         public ChunkRenderer ChunkRendererPrefab;
 
         private BaseInputActions _input = null;
         [SerializeField] private Camera _camera;
+        [SerializeField] private TerrainGenerator generator;
+        private Vector2Int curPlayerChunk;
         
         private void Start()
         {
@@ -23,25 +28,54 @@ namespace GDB.Meshes
             if(_camera == null)
                 _camera = Camera.main;
             
-            for(int x = 0; x < 10; x++)
-            for (int y = 0; y < 10; y++)
-            {
-                var xPos = x * ChunkRenderer.ChunkWidth * ChunkRenderer.BlockScale;
-                var zPos = y * ChunkRenderer.ChunkWidth * ChunkRenderer.BlockScale;
-                var chunkData = new ChunkData();
-                
-                chunkData.Pos = new Vector2Int() {x = x, y = y};
-                
-                chunkData.Blocks = TerrainGenerator
-                    .GenerateTerrain(xPos, zPos).Blocks;
-                
-                ChunkDatas.Add(new Vector2Int(x, y), chunkData);
-                
-                var chunk = Instantiate(ChunkRendererPrefab, new Vector3(xPos, 0, zPos), Quaternion.identity, transform);
-                chunk.CData = chunkData;
-                chunk.World = this;
+            StartCoroutine(GenerateChunks(false));
+        }
 
-                chunkData.Renderer = chunk;
+        private IEnumerator GenerateChunks(bool wait)
+        {
+            for(int x = curPlayerChunk.x - VIEW_RADIUS; x < curPlayerChunk.x + VIEW_RADIUS; x++)
+                for (int y = curPlayerChunk.y - VIEW_RADIUS; y < curPlayerChunk.y + VIEW_RADIUS; y++)
+                {
+                    var chunkPos = new Vector2Int(x, y);
+                    if (ChunkDatas.ContainsKey(chunkPos))
+                        continue;
+                    
+                    LoadChunkAt(chunkPos);
+                    
+                    if(wait)
+                        yield return new WaitForSecondsRealtime(0.2f);
+                }
+        }
+
+        private void LoadChunkAt(Vector2Int chunkPos)
+        {
+            var xPos = chunkPos.x * ChunkRenderer.ChunkWidth * ChunkRenderer.BlockScale;
+            var zPos = chunkPos.y * ChunkRenderer.ChunkWidth * ChunkRenderer.BlockScale;
+            var chunkData = new ChunkData();
+                    
+            chunkData.Pos = chunkPos;
+                    
+            chunkData.Blocks = generator.GenerateTerrain(xPos, zPos).Blocks;
+                    
+            ChunkDatas.Add(chunkPos, chunkData);
+                    
+            var chunk = Instantiate(ChunkRendererPrefab, new Vector3(xPos, 0, zPos), Quaternion.identity, transform);
+            chunk.CData = chunkData;
+            chunk.World = this;
+
+            chunkData.Renderer = chunk;
+        }
+
+        private void Update()
+        {
+            Vector3 blockPos = _camera.transform.position;
+            Vector3Int PlayerWPos = Vector3Int.FloorToInt(blockPos / ChunkRenderer.BlockScale);
+            Vector2Int playerChunk = GetChunkContaisBlock(PlayerWPos);
+
+            if (playerChunk != curPlayerChunk)
+            {
+                curPlayerChunk = playerChunk;
+                StartCoroutine(GenerateChunks(true));
             }
         }
 
@@ -96,6 +130,20 @@ namespace GDB.Meshes
         public Vector2Int GetChunkContaisBlock(Vector3Int blockWPos)
         {
             return new Vector2Int(blockWPos.x / ChunkRenderer.ChunkWidth, blockWPos.z / ChunkRenderer.ChunkWidth);
+        }
+
+        [ContextMenu("CubeMania/Regenerate")]
+        public void Regenerate()
+        {
+            generator.Init();
+            
+            foreach (var chunkData in ChunkDatas)
+            {
+                Destroy(chunkData.Value.Renderer.gameObject);
+            }
+            ChunkDatas.Clear();
+
+            StartCoroutine(GenerateChunks(false));
         }
     }
 }
