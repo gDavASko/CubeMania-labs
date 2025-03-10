@@ -190,6 +190,10 @@ MonoBehaviour:
   - NoiseType: 3
     Frequence: 0.04
     Amplitude: 3
+  _domainWarpSettings:
+    NoiseType: 3
+    Frequence: 0.2
+    Amplitude: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
