@@ -18,6 +18,10 @@ namespace GDB.Meshes
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
+        public int textureWidth = 1972;
+        public int textureHeight = 916;
+        public int textureSize = 34;
+        
         public const int ChunkWidth = 32;
         public const int ChunkHeight = 128;
         public const float BlockScale = 1f;
@@ -34,9 +38,6 @@ namespace GDB.Meshes
         private void Start()
         {
             chunkMesh = new Mesh();
-
-            //CData = TerrainGenerator.GenerateTerrain((int)transform.position.x, (int)transform.position.z);
-
             RegenerateMesh();
 
             GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -74,7 +75,7 @@ namespace GDB.Meshes
 
         public void SpawnBlock(Vector3Int pos)
         {
-            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Stone;
+            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Dirt;
             RegenerateMesh();
         }
         
@@ -180,41 +181,41 @@ namespace GDB.Meshes
             triangles.Add(vertices.Count - 2);
         }
 
-        private void AddUVs(BlockType type, Vector2Int normal)
+        /*private void AddUVs(BlockType type, Vector2Int normal)
         {
-            uvs.Add(new Vector2(0, 0));
-            uvs.Add(new Vector2(0, 1));
-            uvs.Add(new Vector2(1, 0));
-            uvs.Add(new Vector2(1, 1));
-        }
+            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
+            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
+            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
+            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
+        }*/
         
-        /*private void AddUVs(BlockType blockType, Vector2Int normal)
+        private void AddUVs(BlockType blockType, Vector2Int normal)
         {
             Vector2 uv;
             if (blockType == BlockType.Grass)
             {
-                uv = normal == Vector2Int.up ? new Vector2(32f / 256, 240f / 256) :
-                    normal == Vector2Int.down ? new Vector2(32f / 256, 240f / 256) :
-                    new Vector2(32f / 256, 240f / 256);
+                uv = normal == Vector2Int.up ? new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight) :
+                    normal == Vector2Int.down ? new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight) :
+                    new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight);
             }
             else if (blockType == BlockType.Stone)
             {
-                uv = new Vector2(16f / 256, 240f / 256);
+                uv = new Vector2((1f * textureSize) / textureWidth, (9f * textureSize) / textureHeight);
             }
-            else if (blockType == BlockType.Wood)
+            else if (blockType == BlockType.Dirt)
             {
-                uv = new Vector2(64f / 256, 240f / 256);
+                uv = new Vector2((14f * textureSize) / textureWidth, (7f * textureSize) / textureHeight);
             }
             else
             {
-                uv = new Vector2(160f / 256, 224f / 256);
+                uv = new Vector2((0f * textureSize) / textureWidth, (1f * textureSize) / textureHeight);
             }
 
             for (int i = 0; i < 4; i++)
             {
                 uvs.Add(uv);
             }
-        }*/
+        }
 
         private void GenRightSide(Vector3Int pos)
         {

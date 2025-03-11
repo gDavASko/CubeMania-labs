@@ -129,7 +129,14 @@ namespace GDB.Meshes
 
         public Vector2Int GetChunkContaisBlock(Vector3Int blockWPos)
         {
-            return new Vector2Int(blockWPos.x / ChunkRenderer.ChunkWidth, blockWPos.z / ChunkRenderer.ChunkWidth);
+            Vector2Int pos = new Vector2Int(blockWPos.x / ChunkRenderer.ChunkWidth, blockWPos.z / ChunkRenderer.ChunkWidth);
+            
+            if(blockWPos.x < 0) 
+                pos.x--;
+            if(blockWPos.y < 0) 
+                pos.y--;
+            
+            return pos;
         }
 
         [ContextMenu("CubeMania/Regenerate")]
