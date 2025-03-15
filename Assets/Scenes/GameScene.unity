@@ -129,7 +129,6 @@ GameObject:
   m_Component:
   - component: {fileID: 118003852}
   - component: {fileID: 118003851}
-  - component: {fileID: 118003853}
   m_Layer: 0
   m_Name: GameWorld
   m_TagString: Untagged
@@ -151,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ChunkRendererPrefab: {fileID: 6524681989096929565, guid: 7846859159853684aa3d760c0ae8d47a, type: 3}
   _camera: {fileID: 1252101129}
-  generator: {fileID: 118003853}
+  generator: {fileID: 11400000, guid: c0f91f796bac482429777a20e3404640, type: 2}
 --- !u!4 &118003852
 Transform:
   m_ObjectHideFlags: 0
@@ -167,33 +166,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &118003853
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 118003850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d5797083de166c4caa4428ce0d7a4dc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _baseHeight: 16
-  _noiseSettings:
-  - NoiseType: 0
-    Frequence: 0.25
-    Amplitude: 0.5
-  - NoiseType: 0
-    Frequence: 0.0333
-    Amplitude: 10
-  - NoiseType: 3
-    Frequence: 0.04
-    Amplitude: 3
-  _domainWarpSettings:
-    NoiseType: 3
-    Frequence: 0.2
-    Amplitude: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

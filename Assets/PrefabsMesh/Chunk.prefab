@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be4e6faf899317e41bb24e52faae0b50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _config: {fileID: 11400000, guid: af988f38b5ecd7d489a22ab78d9899b9, type: 2}
   textureWidth: 1972
   textureHeight: 916
   textureSize: 34

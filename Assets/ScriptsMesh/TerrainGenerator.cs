@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace GDB.Meshes
 {
-    public class TerrainGenerator: MonoBehaviour
+    [CreateAssetMenu(fileName = "TerrainGenerator", menuName = "GDB/TerrainGenerator")]
+    public class TerrainGenerator: ScriptableObject
     {
         [SerializeField] private float _baseHeight = 8;
         [SerializeField] private NoiseOctaveSettings[] _noiseSettings;
@@ -11,11 +12,6 @@ namespace GDB.Meshes
         
         private FastNoiseLite warpNoise;
         private FastNoiseLite[] _octaveNoises;
-        
-        private void Awake()
-        {
-            Init();
-        }
 
         public void Init()
         {
@@ -50,7 +46,7 @@ namespace GDB.Meshes
                     {
                         if (height - y * ChunkRenderer.BlockScale < grassLayerHeight)
                         {
-                            result[x, y, z] = BlockType.Stone;
+                            result[x, y, z] = BlockType.Grass;
                         }
                         else if(y * ChunkRenderer.BlockScale < bedrockLayerHeight)
                         {

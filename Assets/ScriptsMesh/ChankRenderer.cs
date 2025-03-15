@@ -4,20 +4,11 @@ using UnityEngine;
 
 namespace GDB.Meshes
 {
-    public enum BlockType: byte
-    {
-        Air = 0,
-        Stone = 1,
-        Grass = 2,
-        Sand = 4,
-        Dirt = 8,
-        Water = 16,
-        Bedrock = 32,
-    }
-    
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public class ChunkRenderer : MonoBehaviour
     {
+        [SerializeField] private BlocksCommon _config = null;
+        
         public int textureWidth = 1972;
         public int textureHeight = 916;
         public int textureSize = 34;
@@ -180,36 +171,12 @@ namespace GDB.Meshes
             triangles.Add(vertices.Count - 1);
             triangles.Add(vertices.Count - 2);
         }
-
-        /*private void AddUVs(BlockType type, Vector2Int normal)
-        {
-            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
-            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
-            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
-            uvs.Add(new Vector2((7f * textureSize) / textureWidth, (26f * textureSize) / textureHeight));
-        }*/
         
         private void AddUVs(BlockType blockType, Vector2Int normal)
         {
-            Vector2 uv;
-            if (blockType == BlockType.Grass)
-            {
-                uv = normal == Vector2Int.up ? new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight) :
-                    normal == Vector2Int.down ? new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight) :
-                    new Vector2((23f * textureSize) / textureWidth, (10f * textureSize) / textureHeight);
-            }
-            else if (blockType == BlockType.Stone)
-            {
-                uv = new Vector2((1f * textureSize) / textureWidth, (9f * textureSize) / textureHeight);
-            }
-            else if (blockType == BlockType.Dirt)
-            {
-                uv = new Vector2((14f * textureSize) / textureWidth, (7f * textureSize) / textureHeight);
-            }
-            else
-            {
-                uv = new Vector2((0f * textureSize) / textureWidth, (1f * textureSize) / textureHeight);
-            }
+            BlockInfoSimple bInfoSimple = _config.Get(blockType);
+            var offset = bInfoSimple.GetPixelOffset(normal);
+            Vector2 uv = new Vector2((offset.x * textureSize) / textureWidth, (offset.y * textureSize) / textureHeight);
 
             for (int i = 0; i < 4; i++)
             {

@@ -28,6 +28,7 @@ namespace GDB.Meshes
             if(_camera == null)
                 _camera = Camera.main;
             
+            generator.Init();
             StartCoroutine(GenerateChunks(false));
         }
 
@@ -133,7 +134,7 @@ namespace GDB.Meshes
             
             if(blockWPos.x < 0) 
                 pos.x--;
-            if(blockWPos.y < 0) 
+            if(blockWPos.z < 0) 
                 pos.y--;
             
             return pos;
