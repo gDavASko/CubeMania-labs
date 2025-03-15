@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace GDB.Meshes
@@ -14,6 +15,7 @@ namespace GDB.Meshes
         public int textureSize = 34;
         
         public const int ChunkWidth = 32;
+        public const int ChunkWidthSq = ChunkWidth * ChunkWidth;
         public const int ChunkHeight = 128;
         public const float BlockScale = 1f;
 
@@ -26,62 +28,105 @@ namespace GDB.Meshes
 
         private Mesh chunkMesh;
 
+        private ChunkData _leftChunk;
+        private ChunkData _rightChunk;
+        private ChunkData _fwdChunk;
+        private ChunkData _backChunk;
+
+        private static int[] _triangles;
+
         private void Start()
         {
+            World.ChunkDatas.TryGetValue(CData.Pos + Vector2Int.left, out _leftChunk);
+            World.ChunkDatas.TryGetValue(CData.Pos + Vector2Int.right, out _rightChunk);
+            World.ChunkDatas.TryGetValue(CData.Pos + Vector2Int.up, out _fwdChunk);
+            World.ChunkDatas.TryGetValue(CData.Pos + Vector2Int.down, out _backChunk);
+            
             chunkMesh = new Mesh();
             RegenerateMesh();
 
             GetComponent<MeshFilter>().mesh = chunkMesh;
         }
 
+        public static void InitTriangles()
+        {
+            _triangles = new int[65536*6/4];
+
+            int vertNum = 4;
+            for (int i = 0; i < _triangles.Length; i+=6)
+            {
+                _triangles[i] = vertNum - 4;
+                _triangles[i + 1] = vertNum - 3;
+                _triangles[i + 2] = vertNum - 2;
+                 
+                _triangles[i + 3] = vertNum - 3;
+                _triangles[i + 4] = vertNum - 1;
+                _triangles[i + 5] = vertNum - 2;
+                vertNum += 4;
+            }
+            
+        }
+        
+        private static ProfilerMarker _genMarker = new ProfilerMarker(ProfilerCategory.Loading, "GenMesh");
         private void RegenerateMesh()
         {
+            _genMarker.Begin();
+            
             vertices.Clear();
             uvs.Clear();
-            triangles.Clear();
-            
+
+            int maxY = 0;
             for (int y = 0; y < ChunkHeight; y++)
             {
                 for (int x = 0; x < ChunkWidth; x++)
                 {
                     for (int z = 0; z < ChunkWidth; z++)
                     {
-                        GenBlock(x, y, z);
+                        if (TryGenBlock(x, y, z))
+                        {
+                            if(maxY < y)
+                                maxY = y;
+                        }
                     }
                 }
             }
 
-            chunkMesh.triangles = Array.Empty<int>();
             chunkMesh.vertices = vertices.ToArray();
             chunkMesh.uv = uvs.ToArray();
-            chunkMesh.triangles = triangles.ToArray();
+            chunkMesh.SetTriangles(_triangles, 0, vertices.Count * 6 / 4, 0, false);
             
             chunkMesh.Optimize();
             
             chunkMesh.RecalculateNormals();
-            chunkMesh.RecalculateBounds();
+            Vector3 bSize = new Vector3(ChunkWidth, maxY, ChunkWidth) * BlockScale;
+            chunkMesh.bounds = new Bounds(bSize/2, bSize);
             
             GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+            
+            _genMarker.End();
         }
 
         public void SpawnBlock(Vector3Int pos)
         {
-            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Dirt;
+            int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+            CData.Blocks[index] = BlockType.Dirt;
             RegenerateMesh();
         }
         
         public void DestroyBlock(Vector3Int pos)
         {
-            CData.Blocks[pos.x, pos.y, pos.z] = BlockType.Air;
+            int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+            CData.Blocks[index] = BlockType.Air;
             RegenerateMesh();
         }
         
-        private void GenBlock(int x, int y, int z)
+        private bool TryGenBlock(int x, int y, int z)
         {
             var pos = new Vector3Int(x, y, z);
             var blockType = GetBlockInPos(pos);
             
-            if(GetBlockInPos(pos) == 0) return;
+            if(GetBlockInPos(pos) == 0) 
+                return false;
             
             if(GetBlockInPos(pos + Vector3Int.right) == 0)
             {
@@ -108,11 +153,13 @@ namespace GDB.Meshes
                 GenTopSide(pos);
                 AddUVs(blockType, Vector2Int.up);
             }
-            if(GetBlockInPos(pos + Vector3Int.down) == 0)
+            if(/*pos.y > 0 && */GetBlockInPos(pos + Vector3Int.down) == 0)
             {
                 GenBottomSide(pos);
                 AddUVs(blockType, Vector2Int.down);
             }
+
+            return true;
         }
 
         private BlockType GetBlockInPos(Vector3Int pos)
@@ -122,54 +169,56 @@ namespace GDB.Meshes
                pos.z >= 0 && pos.z < ChunkWidth)
 
             {
-                return CData.Blocks[pos.x, pos.y, pos.z];
+                int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+                return CData.Blocks[index];
             }
             else
             {
                 if (pos.y < 0 || pos.y >= ChunkHeight) 
                     return BlockType.Air;
                 
-                var adjCPos = CData.Pos;
                 if (pos.x < 0)
                 {
-                    adjCPos.x--;
+                    if (_leftChunk == null)
+                        return BlockType.Air;
+                    
                     pos.x += ChunkWidth;
+                    int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+                    return _leftChunk.Blocks[index];
                 }
-                else if (pos.x >= ChunkWidth)
+                
+                if (pos.x >= ChunkWidth)
                 {
-                    adjCPos.x++;
+                    if (_rightChunk == null)
+                        return BlockType.Air;
+                    
                     pos.x -= ChunkWidth;
+                    int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+                    return _rightChunk.Blocks[index];
                 }
                 
                 if (pos.z < 0)
                 {
-                    adjCPos.y--;
+                    if (_backChunk == null)
+                        return BlockType.Air;
+                    
                     pos.z += ChunkWidth;
+                    int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+                    return _backChunk.Blocks[index];
                 }
-                else if (pos.z >= ChunkWidth)
+                
+                if (pos.z >= ChunkWidth)
                 {
-                    adjCPos.y++;
+                    if (_fwdChunk == null)
+                        return BlockType.Air;
+                    
                     pos.z -= ChunkWidth;
-                }
-
-                if(World.ChunkDatas.TryGetValue(adjCPos, out var chunk))
-                {
-                    return chunk.Blocks[pos.x, pos.y, pos.z];
+                    int index = pos.x + pos.y * ChunkWidthSq + pos.z * ChunkWidth;
+                    return _fwdChunk.Blocks[index];
                 }
                 
                 return BlockType.Air;
             }
-        }
-        
-        private void AddLastVertSquare()
-        {
-            triangles.Add(vertices.Count - 4);
-            triangles.Add(vertices.Count - 3);
-            triangles.Add(vertices.Count - 2);
-            
-            triangles.Add(vertices.Count - 3);
-            triangles.Add(vertices.Count - 1);
-            triangles.Add(vertices.Count - 2);
         }
         
         private void AddUVs(BlockType blockType, Vector2Int normal)
@@ -190,8 +239,6 @@ namespace GDB.Meshes
             vertices.Add(new Vector3(1, 1, 0)+ pos);
             vertices.Add(new Vector3(1, 0, 1)+ pos);
             vertices.Add(new Vector3(1, 1, 1)+ pos);
-
-            AddLastVertSquare();
         }
         
         private void GenLeftSide(Vector3Int pos)
@@ -200,8 +247,6 @@ namespace GDB.Meshes
             vertices.Add((new Vector3(0, 0, 1)+ pos) * BlockScale);
             vertices.Add((new Vector3(0, 1, 0)+ pos) * BlockScale);
             vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
-
-            AddLastVertSquare();
         }
         
         private void GenFrontSide(Vector3Int pos)
@@ -210,9 +255,6 @@ namespace GDB.Meshes
             vertices.Add((new Vector3(1, 0, 1)+ pos) * BlockScale);
             vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 1, 1)+ pos) * BlockScale);
-            
-
-            AddLastVertSquare();
         }
         
         private void GenBackSide(Vector3Int pos)
@@ -221,8 +263,6 @@ namespace GDB.Meshes
             vertices.Add((new Vector3(0, 1, 0)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 0, 0)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 1, 0)+ pos) * BlockScale);
-
-            AddLastVertSquare();
         }
         
         private void GenTopSide(Vector3Int pos)
@@ -231,8 +271,6 @@ namespace GDB.Meshes
             vertices.Add((new Vector3(0, 1, 1)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 1, 0)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 1, 1)+ pos) * BlockScale);
-
-            AddLastVertSquare();
         }
         
         private void GenBottomSide(Vector3Int pos)
@@ -241,15 +279,6 @@ namespace GDB.Meshes
             vertices.Add((new Vector3(1, 0, 0)+ pos) * BlockScale);
             vertices.Add((new Vector3(0, 0, 1)+ pos) * BlockScale);
             vertices.Add((new Vector3(1, 0, 1)+ pos) * BlockScale);
-
-            AddLastVertSquare();
         }
-    }
-
-    public class ChunkData
-    {
-        public Vector2Int Pos;
-        public ChunkRenderer Renderer;
-        public BlockType[,,] Blocks;
     }
 }

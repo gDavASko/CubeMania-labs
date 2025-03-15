@@ -28,14 +28,16 @@ namespace GDB.Meshes
             if(_camera == null)
                 _camera = Camera.main;
             
+            ChunkRenderer.InitTriangles();
+            
             generator.Init();
             StartCoroutine(GenerateChunks(false));
         }
 
         private IEnumerator GenerateChunks(bool wait)
         {
-            for(int x = curPlayerChunk.x - VIEW_RADIUS; x < curPlayerChunk.x + VIEW_RADIUS; x++)
-                for (int y = curPlayerChunk.y - VIEW_RADIUS; y < curPlayerChunk.y + VIEW_RADIUS; y++)
+            for(int x = curPlayerChunk.x - VIEW_RADIUS; x <= curPlayerChunk.x + VIEW_RADIUS; x++)
+                for (int y = curPlayerChunk.y - VIEW_RADIUS; y <= curPlayerChunk.y + VIEW_RADIUS; y++)
                 {
                     var chunkPos = new Vector2Int(x, y);
                     if (ChunkDatas.ContainsKey(chunkPos))

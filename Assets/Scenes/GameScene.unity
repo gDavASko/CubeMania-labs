@@ -150,7 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ChunkRendererPrefab: {fileID: 6524681989096929565, guid: 7846859159853684aa3d760c0ae8d47a, type: 3}
   _camera: {fileID: 1252101129}
-  generator: {fileID: 11400000, guid: c0f91f796bac482429777a20e3404640, type: 2}
+  generator: {fileID: 11400000, guid: bed52da147f9e044c8a3d92bcca62020, type: 2}
 --- !u!4 &118003852
 Transform:
   m_ObjectHideFlags: 0

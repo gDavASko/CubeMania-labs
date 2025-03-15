@@ -1,4 +1,5 @@
 using System;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace GDB.Meshes
@@ -30,9 +31,12 @@ namespace GDB.Meshes
             warpNoise.SetDomainWarpAmp(_domainWarpSettings.Amplitude);
         }
 
+        private static ProfilerMarker _genMarker = new ProfilerMarker(ProfilerCategory.Loading, "GeneratorTerrain");
         public ChunkData GenerateTerrain(float xOffset, float zOffset)
         {
-            var result = new BlockType[ChunkRenderer.ChunkWidth, ChunkRenderer.ChunkHeight, ChunkRenderer.ChunkWidth];
+            _genMarker.Begin();
+            
+            var result = new BlockType[ChunkRenderer.ChunkWidth * ChunkRenderer.ChunkHeight * ChunkRenderer.ChunkWidth];
 
             for (int x = 0; x < ChunkRenderer.ChunkWidth; x++)
             {
@@ -44,22 +48,25 @@ namespace GDB.Meshes
                    
                     for (int y = 0; y < height / ChunkRenderer.BlockScale; y++)
                     {
+                        int index = x + y * ChunkRenderer.ChunkWidthSq + z * ChunkRenderer.ChunkWidth;
                         if (height - y * ChunkRenderer.BlockScale < grassLayerHeight)
                         {
-                            result[x, y, z] = BlockType.Grass;
+                            result[index] = BlockType.Grass;
                         }
                         else if(y * ChunkRenderer.BlockScale < bedrockLayerHeight)
                         {
-                            result[x, y, z] = BlockType.Bedrock;
+                            result[index] = BlockType.Bedrock;
                         }
                         else
                         {
-                            result[x, y, z] = BlockType.Dirt;
+                            result[index] = BlockType.Dirt;
                         }
                     }
                 }
             }
-
+            
+            _genMarker.End();
+            
             return new ChunkData() { Blocks = result };
         }
 
