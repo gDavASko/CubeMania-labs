@@ -9,9 +9,11 @@ namespace GDB.Meshes
         [SerializeField] private BlockInfoSimple[] blocks;
         [SerializeField] private BlockInfoSimple _defaultblock;
 
+        public BlockInfoSimple DefaultBlock => _defaultblock;
+        
         private Dictionary<BlockType, BlockInfoSimple> _blocksDict = null;
 
-        private Dictionary<BlockType, BlockInfoSimple> BlocksDict
+        public Dictionary<BlockType, BlockInfoSimple> BlocksDict
         {
             get
             {

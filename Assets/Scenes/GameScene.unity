@@ -148,9 +148,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5510782032180ce40bbb979bcf57b531, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChunkRendererPrefab: {fileID: 6524681989096929565, guid: 7846859159853684aa3d760c0ae8d47a, type: 3}
+  _viewRadius: 10
   _camera: {fileID: 1252101129}
   generator: {fileID: 11400000, guid: bed52da147f9e044c8a3d92bcca62020, type: 2}
+  _config: {fileID: 11400000, guid: af988f38b5ecd7d489a22ab78d9899b9, type: 2}
+  ChunkRendererPrefab: {fileID: 6524681989096929565, guid: 7846859159853684aa3d760c0ae8d47a, type: 3}
 --- !u!4 &118003852
 Transform:
   m_ObjectHideFlags: 0

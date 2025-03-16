@@ -13,7 +13,7 @@ namespace GDB.Meshes
         [field:SerializeField] public AudioClip StepsSound { get; private set; } = null;
         [field:SerializeField] public int Health { get; private set; } = 10;
 
-        public virtual Vector2 GetPixelOffset(Vector2 normal)
+        public virtual Vector2 GetPixelOffset(Vector3 normal)
         {
             return AtlasSpritePositions.Rnd();
         }

@@ -8,13 +8,13 @@ namespace GDB.Meshes
         [field:SerializeField] protected Vector2[] AtlasSpritePositionsUp { get; private set; } = null;
         [field:SerializeField] protected Vector2[] AtlasSpritePositionsDown { get; private set; } = null;
 
-        public override Vector2 GetPixelOffset(Vector2 normal)
+        public override Vector2 GetPixelOffset(Vector3 normal)
         {
             Vector2 res;
 
-            if (normal == Vector2.up)
+            if (normal == Vector3.up)
                 res = AtlasSpritePositionsUp.Rnd();
-            else if (normal == Vector2.down)
+            else if (normal == Vector3.down)
                 res = AtlasSpritePositionsDown.Rnd();
             else
                 res = base.GetPixelOffset(normal);

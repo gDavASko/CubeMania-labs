@@ -31,29 +31,26 @@ namespace GDB.Meshes
             warpNoise.SetDomainWarpAmp(_domainWarpSettings.Amplitude);
         }
 
-        private static ProfilerMarker _genMarker = new ProfilerMarker(ProfilerCategory.Loading, "GeneratorTerrain");
         public ChunkData GenerateTerrain(float xOffset, float zOffset)
         {
-            _genMarker.Begin();
-            
-            var result = new BlockType[ChunkRenderer.ChunkWidth * ChunkRenderer.ChunkHeight * ChunkRenderer.ChunkWidth];
+            var result = new BlockType[MeshBuilder.ChunkWidth * MeshBuilder.ChunkHeight * MeshBuilder.ChunkWidth];
 
-            for (int x = 0; x < ChunkRenderer.ChunkWidth; x++)
+            for (int x = 0; x < MeshBuilder.ChunkWidth; x++)
             {
-                for (int z = 0; z < ChunkRenderer.ChunkWidth; z++)
+                for (int z = 0; z < MeshBuilder.ChunkWidth; z++)
                 {
-                   float height = GetHeight(x * ChunkRenderer.BlockScale + xOffset, z * ChunkRenderer.BlockScale + zOffset);
+                   float height = GetHeight(x * MeshBuilder.BlockScale + xOffset, z * MeshBuilder.BlockScale + zOffset);
                    float grassLayerHeight = 1;
                    float bedrockLayerHeight = 0.5f;
                    
-                    for (int y = 0; y < height / ChunkRenderer.BlockScale; y++)
+                    for (int y = 0; y < height / MeshBuilder.BlockScale; y++)
                     {
-                        int index = x + y * ChunkRenderer.ChunkWidthSq + z * ChunkRenderer.ChunkWidth;
-                        if (height - y * ChunkRenderer.BlockScale < grassLayerHeight)
+                        int index = x + y * MeshBuilder.ChunkWidthSq + z * MeshBuilder.ChunkWidth;
+                        if (height - y * MeshBuilder.BlockScale < grassLayerHeight)
                         {
                             result[index] = BlockType.Grass;
                         }
-                        else if(y * ChunkRenderer.BlockScale < bedrockLayerHeight)
+                        else if(y * MeshBuilder.BlockScale < bedrockLayerHeight)
                         {
                             result[index] = BlockType.Bedrock;
                         }
@@ -64,8 +61,6 @@ namespace GDB.Meshes
                     }
                 }
             }
-            
-            _genMarker.End();
             
             return new ChunkData() { Blocks = result };
         }
