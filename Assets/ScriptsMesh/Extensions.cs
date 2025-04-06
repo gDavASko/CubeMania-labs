@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
 
 public static class Extensions
 {
+    private static System.Random rnd = new System.Random();
+    
     public static T Rnd<T>(this List<T> anyArray)
     {
         if (anyArray == null || anyArray.Count == 0)
@@ -11,7 +12,7 @@ public static class Extensions
         if(anyArray.Count == 1)
             return anyArray[0];
         
-        return anyArray[Random.Range(0, anyArray.Count)];
+        return anyArray[rnd.Next(int.MaxValue) % anyArray.Count];
     }
     
     public static T Rnd<T>(this T[] anyArray)
@@ -22,6 +23,6 @@ public static class Extensions
         if(anyArray.Length == 1)
             return anyArray[0];
         
-        return anyArray[Random.Range(0, anyArray.Length)];
+        return anyArray[rnd.Next(int.MaxValue) %  anyArray.Length];
     }
 }

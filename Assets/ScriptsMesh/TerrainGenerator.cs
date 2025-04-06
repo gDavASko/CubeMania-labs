@@ -1,5 +1,4 @@
 using System;
-using Unity.Profiling;
 using UnityEngine;
 
 namespace GDB.Meshes
@@ -33,6 +32,12 @@ namespace GDB.Meshes
 
         public ChunkData GenerateTerrain(float xOffset, float zOffset)
         {
+            if (_octaveNoises == null || warpNoise == null)
+            {
+                Debug.LogError("TerrainGenerator not initialized! Call Init() first.");
+                Init(); // Auto-initialize if needed
+            }
+            
             var result = new BlockType[MeshBuilder.ChunkWidth * MeshBuilder.ChunkHeight * MeshBuilder.ChunkWidth];
 
             for (int x = 0; x < MeshBuilder.ChunkWidth; x++)

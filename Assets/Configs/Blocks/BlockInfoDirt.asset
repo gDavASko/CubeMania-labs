@@ -13,13 +13,9 @@ MonoBehaviour:
   m_Name: BlockInfoDirt
   m_EditorClassIdentifier: 
   <BlockType>k__BackingField: 8
-  <AtlasSpritePositions>k__BackingField:
-  - {x: 14, y: 7}
+  <AtlasSpritePositions>k__BackingField: {x: 10, y: 3}
   <AtlasBreakSpritePositions>k__BackingField:
-  - {x: 55, y: 21}
-  - {x: 54, y: 20}
-  - {x: 53, y: 19}
-  - {x: 37, y: 1}
+  - {x: 14, y: 0}
   <BreakSound>k__BackingField: {fileID: 0}
   <StepsSound>k__BackingField: {fileID: 0}
   <Health>k__BackingField: 10

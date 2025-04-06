@@ -30,16 +30,47 @@ namespace GDB.Meshes
             int index = pos.x + pos.y * MeshBuilder.ChunkWidthSq + pos.z * MeshBuilder.ChunkWidth;
             CData.Blocks[index] = BlockType.Dirt;
             RegenerateMesh();
+            
+            // Check if the block is at the edge and regenerate adjacent chunks if needed
+            if (pos.x == 0 && CData.LeftChunk != null && CData.LeftChunk.Renderer != null)
+                CData.LeftChunk.Renderer.RegenerateMesh();
+            else if (pos.x == MeshBuilder.ChunkWidth - 1 && CData.RightChunk != null && CData.RightChunk.Renderer != null)
+                CData.RightChunk.Renderer.RegenerateMesh();
+        
+            if (pos.z == 0 && CData.BackChunk != null && CData.BackChunk.Renderer != null)
+                CData.BackChunk.Renderer.RegenerateMesh();
+            else if (pos.z == MeshBuilder.ChunkWidth - 1 && CData.FwdChunk != null && CData.FwdChunk.Renderer != null)
+                CData.FwdChunk.Renderer.RegenerateMesh();
         }
 
-        public void DestroyBlock(Vector3Int pos)
+        /*public void DestroyBlock(Vector3Int pos)
         {
             int index = pos.x + pos.y * MeshBuilder.ChunkWidthSq + pos.z * MeshBuilder.ChunkWidth;
             CData.Blocks[index] = BlockType.Air;
             RegenerateMesh();
+        }*/
+        
+        public void DestroyBlock(Vector3Int pos)
+        {
+            int index = pos.x + pos.y * MeshBuilder.ChunkWidthSq + pos.z * MeshBuilder.ChunkWidth;
+            
+            if(CData.Blocks[index] != BlockType.Bedrock)
+                CData.Blocks[index] = BlockType.Air;
+            RegenerateMesh();
+    
+            // Check if the block is at the edge and regenerate adjacent chunks if needed
+            if (pos.x == 0 && CData.LeftChunk != null && CData.LeftChunk.Renderer != null)
+                CData.LeftChunk.Renderer.RegenerateMesh();
+            else if (pos.x == MeshBuilder.ChunkWidth - 1 && CData.RightChunk != null && CData.RightChunk.Renderer != null)
+                CData.RightChunk.Renderer.RegenerateMesh();
+        
+            if (pos.z == 0 && CData.BackChunk != null && CData.BackChunk.Renderer != null)
+                CData.BackChunk.Renderer.RegenerateMesh();
+            else if (pos.z == MeshBuilder.ChunkWidth - 1 && CData.FwdChunk != null && CData.FwdChunk.Renderer != null)
+                CData.FwdChunk.Renderer.RegenerateMesh();
         }
 
-        private void RegenerateMesh()
+        public void RegenerateMesh()
         {
             SetMesh(MeshBuilder.GenMeshData(CData));
         }

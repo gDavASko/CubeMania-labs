@@ -6,14 +6,14 @@ namespace GDB.Meshes
 {
     public static class MeshBuilder
     {
-        public const int textureWidth = 1972;
-        public const int textureHeight = 916;
-        public const int textureSize = 34;
+        public const int textureWidth = 4096;
+        public const int textureHeight = 4096;
+        public const int textureSize = 256;
 
         public const int ChunkWidth = 16;
         public const int ChunkWidthSq = ChunkWidth * ChunkWidth;
         public const int ChunkHeight = 128;
-        public const float BlockScale = .25f;
+        public const float BlockScale = 0.5f;
 
         private static Dictionary<BlockType, BlockInfoSimple> BlocksDict = null;
         private static BlockInfoSimple _defaultBlock = null;
@@ -157,7 +157,7 @@ namespace GDB.Meshes
         {
             GameWorld.GeneratedMeshVertex vertex = new GameWorld.GeneratedMeshVertex();
 
-            vertex.normalX = sbyte.MaxValue;
+            vertex.normalX = 1;
             vertex.normalY = 0;
             vertex.normalZ = 0;
             vertex.normalW = 1;
@@ -178,7 +178,7 @@ namespace GDB.Meshes
         {
             GameWorld.GeneratedMeshVertex vertex = new GameWorld.GeneratedMeshVertex();
 
-            vertex.normalX = -sbyte.MaxValue;
+            vertex.normalX = -1;
             vertex.normalY = 0;
             vertex.normalZ = 0;
             vertex.normalW = 1;
@@ -201,7 +201,7 @@ namespace GDB.Meshes
 
             vertex.normalX = 0;
             vertex.normalY = 0;
-            vertex.normalZ = sbyte.MaxValue;
+            vertex.normalZ = 1;
             vertex.normalW = 1;
             
             GetUVs(btype, Vector3Int.forward, out vertex.uvX, out vertex.uvY);
@@ -222,7 +222,7 @@ namespace GDB.Meshes
 
             vertex.normalX = 0;
             vertex.normalY = 0;
-            vertex.normalZ = -sbyte.MaxValue;
+            vertex.normalZ = -1;
             vertex.normalW = 1;
             
             GetUVs(btype, Vector3Int.back, out vertex.uvX, out vertex.uvY);
@@ -242,7 +242,7 @@ namespace GDB.Meshes
             GameWorld.GeneratedMeshVertex vertex = new GameWorld.GeneratedMeshVertex();
 
             vertex.normalX = 0;
-            vertex.normalY = sbyte.MaxValue;
+            vertex.normalY = 1;
             vertex.normalZ = 0;
             vertex.normalW = 1;
             
@@ -263,7 +263,7 @@ namespace GDB.Meshes
             GameWorld.GeneratedMeshVertex vertex = new GameWorld.GeneratedMeshVertex();
 
             vertex.normalX = 0;
-            vertex.normalY = -sbyte.MaxValue;
+            vertex.normalY = -1;
             vertex.normalZ = 0;
             vertex.normalW = 1;
             
@@ -282,11 +282,14 @@ namespace GDB.Meshes
         private static void GetUVs(BlockType blockType, Vector3Int normal, out ushort x, out ushort y)
         {
             BlockInfoSimple bInfoSimple = _defaultBlock;
-            BlocksDict.TryGetValue(blockType, out _defaultBlock);
+            if (BlocksDict.TryGetValue(blockType, out var blockInfo))
+            {
+                bInfoSimple = blockInfo;
+            }
             
             var offset = bInfoSimple.GetPixelOffset(normal);
-            x = unchecked((ushort)(offset.x * textureSize * textureWidth));
-            y = unchecked((ushort)(offset.y * textureSize * textureHeight));
+            x = unchecked((ushort)offset.x);
+            y = unchecked((ushort)offset.y);
         }
     }
 }

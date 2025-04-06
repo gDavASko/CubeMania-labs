@@ -5,6 +5,7 @@ Shader "CubeMania/CubeShader"
         [MainTexture] _BaseMap("Base Map", 2D) = "white" {}
         _TextureScale("Texture scale", Float) = 1
         _TexWidth("Texture width", Float) = 1972
+        _TexHeight("Texture Height", Float) = 916
         _BlockSize("Block width", Float) = 34
     }
     
@@ -25,6 +26,7 @@ Shader "CubeMania/CubeShader"
 
             float _TextureScale;
             float _TexWidth;
+            float _TexHeight;
             float _BlockSize;
             TEXTURE2D(_BaseMap);
             SAMPLER(sampler_BaseMap);
@@ -66,13 +68,14 @@ Shader "CubeMania/CubeShader"
             half4 frag(Varyings IN) : SV_Target
             {
                 float size = _BlockSize/_TexWidth;
+                float size2 = _BlockSize/_TexHeight;
 
                 float x = IN.worldPos.x * _TextureScale;
                 float y = IN.worldPos.y * _TextureScale;
                 float z = IN.worldPos.z * _TextureScale;
                 float isUp = abs(IN.wNormal.y);
                 
-                float2 offset = float2(myFmod((z + x * (1 - isUp)), size), myFmod((y + x * isUp), size));
+                float2 offset = float2(myFmod((z + x * (1 - isUp)), size), myFmod((y + x * isUp), size2));
                 
                 half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv + offset);
                 return color;
